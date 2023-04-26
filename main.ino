@@ -51,19 +51,20 @@
 #define UMBRAL_LUZ_ALTA                   			400
 // Agua
 #define UMBRAL_AGUA_BAJA                   			200
-#define UMBRAL_AGUA_MEDIA                   			400
+#define UMBRAL_AGUA_MEDIA                   		400
 #define UMBRAL_AGUA_ALTA                   			600
 // Sensores
 #define MAX_CANT_SENSORES                           3
 #define SENSOR_HUMEDAD                         		0
 #define SENSOR_LUZ                         			1
-#define SENSOR_NIVEL_AGUA                     2
+#define SENSOR_NIVEL_AGUA                           2
 // Pines
-#define PIN_SENSOR_NIVEL_AGUA							A2
+#define PIN_SENSOR_NIVEL_AGUA						A2
 #define PIN_SENSOR_HUMEDAD                      	A0
 #define PIN_SENSOR_LUZ                    			A1               
 #define PIN_LED_VERDE                               6
 #define PIN_LED_AZUL	                            7
+#define PIN_BOMBA_AGUA                              4
 //----------------------------------------------
 
 //----------------------------------------------
@@ -77,28 +78,27 @@ struct stSensor
 stSensor sensores[MAX_CANT_SENSORES];
 //----------------------------------------------
 
-enum states          { ST_INIT,  ST_IDLE , ST_PRE_WATERING, ST_WATERING, ST_ERROR} current_state;
-String states_s [] = { "ST_INIT", "ST_IDLE" , "ST_PRE_WATERING", "ST_WATERING", "ST_ERROR" };
+enum states          { ST_INIT,  ST_IDLE , ST_LOW_HUMIDITY, ST_LOW_LIGHT, ST_WATERING, ST_ERROR} current_state;
+String states_s [] = { "ST_INIT", "ST_IDLE" , "ST_LOW_HUMIDITY", "ST_LOW_LIGHT", "ST_WATERING", "ST_ERROR" };
 
 enum events          { EV_CONT,  EV_LOW_MOISTURE, EV_MEDIUM_MOISTURE, EV_HIGH_MOISTURE, EV_NIGHTFALL, EV_MORNING, EV_LOW_WATER, EV_MEDIUM_WATER, EV_HIGH_WATER, EV_TIMEOUT, EV_UNKNOWN} new_event;
 String events_s [] = { "EV_CONT",  "EV_LOW_MOISTURE", "EV_MEDIUM_MOISTURE", "EV_HIGH_MOISTURE", "EV_NIGHTFALL", "EV_MORNING", "EV_LOW_WATER", "EV_MEDIUM_WATER", "EV_HIGH_WATER", "EV_TIMEOUT" , "EV_UNKNOWN"};
 
-#define MAX_STATES 7
-#define MAX_EVENTS 12
+#define MAX_STATES 6
+#define MAX_EVENTS 11
 
 typedef void (*transition)();
 
 transition state_table[MAX_STATES][MAX_EVENTS] =
 {
-      {init_    , error         	  , error             , error					  , error       		  , error				  , error } , // state ST_INIT
-      {none     , low_moisture_preM , medium_moisture   , high_moisture	  , low_sunlight_preS	, high_sunlight , low_water } , // state ST_IDLE
-      {none     , low_moisture_preM , medium_moisture   , high_moisture 	, low_sunlight_preM , high_sunlight , none } , // state ST_PRE_WATERING_MOISTURE
-      {none     , low_moisture_preS , medium_moisture   , high_moisture 	, low_sunlight_preS , high_sunlight , none } , // state ST_PRE_WATERING_SUNLIGHT 
-      {none     , low_moisture_preS , medium_moisture   , high_moisture 	, low_sunlight_preS , high_sunlight , none } , // state ST_PRE_WATERING_TANK_LEVEL
-      {none     , low_moisture_wat  , medium_moisture   , high_moisture	  , low_sunlight_wat  , high_sunlight , none } , // state ST_WATERING
-      {error    , error         	  , error             , error       		, error       		  , error         , none  , error 	}	// state ST_ERROR
+      {initConfig   , error             , error             , error		      , error       , error		    , error        , error           , error               } , // state ST_INIT
+      {none         , low_moisture      , medium_moisture   , high_moisture	  , low_sunlight, high_sunlight , low_water    , none            , none                } , // state ST_IDLE
+      {none         , low_moisture      , medium_moisture   , high_moisture   , low_sunlight, high_sunlight , none         , none            , none                } , // state ST_LOW_HUMIDITY
+      {none         , none              , medium_moisture   , high_moisture   , none        , high_sunlight , none         , none            , high_water          } , // state ST_LOW_LIGHT 
+      {none         , watering          , none              , high_moisture	  , watering    , high_sunlight , low_water    , medium_water    , watering            } , // state ST_WATERING
+      {error        , error             , error             , error       	  , error       , error         , none         , error 	         , none        , error }   // state ST_ERROR
 
-     //EV_CONT  , EV_LOW_MOISTURE	  , EV_MEDIUM_MOISTURE, EV_HIGH_MOISTURE, EV_NIGHTFALL  	  , EV_MORNING		,EV_LOW_WATER ,EV_TIMEOUT
+     //EV_CONT      , EV_LOW_MOISTURE	, EV_MEDIUM_MOISTURE, EV_HIGH_MOISTURE, EV_NIGHTFALL, EV_MORNING	, EV_LOW_WATER , EV_MEDIUM_WATER, EV_HIGH_WATER, EV_TIMEOUT
 };
 
 bool timeout;
@@ -114,6 +114,7 @@ void do_init()
   
   pinMode(PIN_LED_VERDE, OUTPUT);
   pinMode(PIN_LED_AZUL , OUTPUT);
+  pinMode(PIN_BOMBA_AGUA, OUTPUT);
 
   sensores[SENSOR_HUMEDAD].pin = PIN_SENSOR_HUMEDAD;
   sensores[SENSOR_HUMEDAD].estado = ESTADO_SENSOR_OK;
@@ -150,7 +151,7 @@ long leerSensorLuz()
 
 long leerSensorNivelAgua()
 {
-  return analogRead(PIN_SENSOR_NIVEL_AGUA)
+  return analogRead(PIN_SENSOR_NIVEL_AGUA);
 }
 //----------------------------------------------
 
@@ -237,7 +238,7 @@ bool verificarEstadoSensorLuz()
 
 bool verificarEstadoSensorNivelAgua()
 {
-  sensores[SENSOR_NIVEL_AGUA].valor_actual = leerSensorLuz();
+  sensores[SENSOR_NIVEL_AGUA].valor_actual = leerSensorNivelAgua();
   
   int valor_actual = sensores[SENSOR_NIVEL_AGUA].valor_actual;
   int valor_previo = sensores[SENSOR_NIVEL_AGUA].valor_previo;
@@ -264,37 +265,6 @@ bool verificarEstadoSensorNivelAgua()
   
   return false;
 }
-
-
-// bool verificarEstadoSensoresRiego()
-// {
-//   sensores[SENSOR_LUZ].valor_actual = leerSensorLuz();
-//   sensores[SENSOR_HUMEDAD].valor_actual = leerSensorHumedad();
-//   sensores[SENSOR_NIVEL_AGUA].valor_actual = leerSensorNivelAgua();
-  
-//   int valor_actual_l = sensores[SENSOR_LUZ].valor_actual;
-//   int valor_previo_l = sensores[SENSOR_LUZ].valor_previo;
-//   int valor_actual_h = sensores[SENSOR_HUMEDAD].valor_actual;
-//   int valor_previo_h = sensores[SENSOR_HUMEDAD].valor_previo;
-//   int valor_actual_a = sensores[SENSOR_NIVEL_AGUA].valor_actual;
-//   int valor_previo_a = sensores[SENSOR_NIVEL_AGUA].valor_previo;
-  
-//   if( (valor_actual_l != valor_previo_l) || (valor_actual_h = valor_previo_h) || (valor_actual_a = valor_previo_a))
-//   {
-//     sensores[SENSOR_LUZ].valor_previo = valor_actual_l;
-//     sensores[SENSOR_HUMEDAD].valor_previo = valor_actual_h;
-//     sensores[SENSOR_NIVEL_AGUA].valor_previo = valor_actual_a;
-    
-//     if( valor_actual_l <= UMBRAL_LUZ_BAJA && valor_actual_h <= UMBRAL_HUMEDAD_BAJA && valor_actual_a >= UMBRAL_AGUA_MEDIA)
-//     {
-//       new_event = EV_READY_TO_WATER;
-//     }
-    
-//     return true;
-//   }
-  
-//   return false;
-// }
 //----------------------------------------------
 
 //----------------------------------------------
@@ -321,7 +291,7 @@ void get_new_event( )
 }
 //----------------------------------------------
 
-void init_()
+void initConfig()
 {
   DebugPrintEstado(states_s[current_state], events_s[new_event]);
   apagar_leds();
@@ -341,7 +311,7 @@ void none()
 void low_sunlight()
 {
   actualizar_indicador_led_azul();
-  current_state = ST_PRE_WATERING_SUNLIGHT;
+  current_state = ST_LOW_LIGHT;
 }
 
 void high_sunlight()
@@ -353,7 +323,7 @@ void high_sunlight()
 void low_moisture() 
 {
   actualizar_indicador_led_azul();
-  current_state = ST_PRE_WATERING_MOISTURE;
+  current_state = ST_LOW_HUMIDITY;
 }
 
 void medium_moisture() 
@@ -370,46 +340,20 @@ void high_moisture()
 
 void low_water()
 {
-
+  actualizar_indicador_led_azul();
+  current_state = ST_IDLE;
 }
 
 void medium_water()
 {
-
+  actualizar_indicador_led_azul();
+  current_state = ST_IDLE;
 }
 
 void high_water()
 {
-  
-}
-
-//----------------------------------------------
-
-// PRE_WATERING
-//----------------------------------------------
-void low_sunlight_preM()
-{
   actualizar_indicador_led_verde();
   current_state = ST_WATERING;
-}
-
-void low_sunlight_preS()
-{
-  actualizar_indicador_led_azul();
-  current_state = ST_PRE_WATERING_SUNLIGHT;
-}
-
-
-void low_moisture_preM() 
-{
-  actualizar_indicador_led_azul();
-  current_state = ST_PRE_WATERING_MOISTURE;  
-}
-
-void low_moisture_preS() 
-{
-  actualizar_indicador_led_verde();
-  current_state = ST_WATERING;  
 }
 
 //----------------------------------------------
@@ -417,15 +361,10 @@ void low_moisture_preS()
 
 //WATERING
 //----------------------------------------------
-void low_sunlight_wat()
+void watering()
 {
   actualizar_indicador_led_verde();
-  current_state = ST_WATERING;
-}
-
-void low_moisture_wat() 
-{
-  actualizar_indicador_led_verde();
+  digitalWrite(PIN_BOMBA_AGUA, HIGH);
   current_state = ST_WATERING;
 }
 //----------------------------------------------
@@ -471,4 +410,3 @@ void loop()
   maquinaEstadosRegadorAutomatico();
 }
 //----------------------------------------------
-

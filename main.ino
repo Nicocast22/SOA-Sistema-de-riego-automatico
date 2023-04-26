@@ -1,7 +1,7 @@
 
 // Habilitacion de debug para la impresion por el puerto serial ...
 //----------------------------------------------
-#define SERIAL_DEBUG_ENABLED 1
+#define SERIAL_DEBUG_ENABLED 0
 
 #if SERIAL_DEBUG_ENABLED
   #define DebugPrint(str)\
@@ -27,10 +27,6 @@
 //----------------------------------------------
 
 
-
-
-
-
 //----------------------------------------------
 // Estado de un sensor ...
 #define ESTADO_SENSOR_OK                            108
@@ -45,15 +41,30 @@
 
 // Otras constantes ....
 //----------------------------------------------
-#define UMBRAL_DIFERENCIA_TIMEOUT                   50
-#define UMBRAL_TEMPERATURA_FRIO                     250
-#define UMBRAL_TEMPERATURA_MEDIO                    700
-#define MAX_CANT_SENSORES                           1
-#define SENSOR_TEMPERATURA                          0
-#define PIN_SENSOR_TEMPERATURA                      A0
-#define PIN_LED_AZUL                                7
+#define UMBRAL_DIFERENCIA_TIMEOUT                   10
+// Humedad
+#define UMBRAL_HUMEDAD_BAJA                    		250
+#define UMBRAL_HUMEDAD_MEDIA                    	500
+#define UMBRAL_HUMEDAD_ALTA                    		700
+// Luz
+#define UMBRAL_LUZ_BAJA                   			200
+#define UMBRAL_LUZ_ALTA                   			400
+// Agua
+#define UMBRAL_AGUA_BAJA                   			200
+#define UMBRAL_AGUA_MEDIA                   		400
+#define UMBRAL_AGUA_ALTA                   			600
+// Sensores
+#define MAX_CANT_SENSORES                           3
+#define SENSOR_HUMEDAD                         		0
+#define SENSOR_LUZ                         			1
+#define SENSOR_NIVEL_AGUA                           2
+// Pines
+#define PIN_SENSOR_NIVEL_AGUA						A2
+#define PIN_SENSOR_HUMEDAD                      	A0
+#define PIN_SENSOR_LUZ                    			A1               
 #define PIN_LED_VERDE                               6
-#define PIN_LED_ROJO                                5
+#define PIN_LED_AZUL	                            7
+#define PIN_BOMBA_AGUA                              4
 //----------------------------------------------
 
 //----------------------------------------------
@@ -67,31 +78,34 @@ struct stSensor
 stSensor sensores[MAX_CANT_SENSORES];
 //----------------------------------------------
 
-enum states          { ST_INIT,  ST_IDLE        , ST_WAITING_RESPONSE   , ST_ERROR                                                  } current_state;
-String states_s [] = {"ST_INIT", "ST_IDLE"      , "ST_WAITING_RESPONSE" , "ST_ERROR"                                                };
+enum states          { ST_INIT,  ST_IDLE , ST_LOW_HUMIDITY, ST_LOW_LIGHT, ST_WATERING, ST_ERROR} current_state;
+String states_s [] = { "ST_INIT", "ST_IDLE" , "ST_LOW_HUMIDITY", "ST_LOW_LIGHT", "ST_WATERING", "ST_ERROR" };
 
-enum events          { EV_CONT,  EV_TEMP_COLD   , EV_TEMP_NICE          , EV_TEMP_HOT   , EV_TIMEOUT  , EV_ACK_MSJ    , EV_UNKNOW   } new_event;
-String events_s [] = {"EV_CONT", "EV_TEMP_COLD" , "EV_TEMP_NICE"        , "EV_TEMP_HOT", "EV_TIMEOUT" , "EV_ACK_MSJ"  , "EV_UNKNOW" };
+enum events          { EV_CONT,  EV_LOW_MOISTURE, EV_MEDIUM_MOISTURE, EV_HIGH_MOISTURE, EV_NIGHTFALL, EV_MORNING, EV_LOW_WATER, EV_MEDIUM_WATER, EV_HIGH_WATER, EV_TIMEOUT, EV_UNKNOWN} new_event;
+String events_s [] = { "EV_CONT",  "EV_LOW_MOISTURE", "EV_MEDIUM_MOISTURE", "EV_HIGH_MOISTURE", "EV_NIGHTFALL", "EV_MORNING", "EV_LOW_WATER", "EV_MEDIUM_WATER", "EV_HIGH_WATER", "EV_TIMEOUT" , "EV_UNKNOWN"};
 
-#define MAX_STATES 4
-#define MAX_EVENTS 6
+#define MAX_STATES 6
+#define MAX_EVENTS 11
 
 typedef void (*transition)();
 
 transition state_table[MAX_STATES][MAX_EVENTS] =
 {
-      {init_    , error         , error         , error       , error       , error       } , // state ST_INIT
-      {none     , temp_cold_a   , temp_nice_a   , temp_hot_a  , none        , error       } , // state ST_IDLE
-      {none     , temp_cold_a   , temp_nice     , temp_hot    , none        , error       } , // state ST_WAITING_RESPONSE
-      {error    , error         , error         , error       , error       , error       }   // state ST_ERROR
-      
-     //EV_CONT  , EV_TEMP_COLD  , EV_TEMP_NICE  , EV_TEMP_HOT , EV_TIMEOUT  , EV_ACK_MSJ
+      {initConfig   , error             , error             , error		      , error       , error		    , error        , error           , error               } , // state ST_INIT
+      {none         , low_moisture      , medium_moisture   , high_moisture	  , low_sunlight, high_sunlight , low_water    , none            , none                } , // state ST_IDLE
+      {none         , low_moisture      , medium_moisture   , high_moisture   , low_sunlight, high_sunlight , none         , none            , none                } , // state ST_LOW_HUMIDITY
+      {none         , none              , medium_moisture   , high_moisture   , none        , high_sunlight , none         , none            , high_water          } , // state ST_LOW_LIGHT 
+      {none         , watering          , none              , high_moisture	  , watering    , high_sunlight , low_water    , medium_water    , watering            } , // state ST_WATERING
+      {error        , error             , error             , error       	  , error       , error         , none         , error 	         , none        , error }   // state ST_ERROR
+
+     //EV_CONT      , EV_LOW_MOISTURE	, EV_MEDIUM_MOISTURE, EV_HIGH_MOISTURE, EV_NIGHTFALL, EV_MORNING	, EV_LOW_WATER , EV_MEDIUM_WATER, EV_HIGH_WATER, EV_TIMEOUT
 };
 
 bool timeout;
 long lct;
 bool temperatura;
-
+bool humedad;
+bool luz;
 
 //----------------------------------------------
 void do_init()
@@ -100,10 +114,16 @@ void do_init()
   
   pinMode(PIN_LED_VERDE, OUTPUT);
   pinMode(PIN_LED_AZUL , OUTPUT);
-  pinMode(PIN_LED_ROJO , OUTPUT);
+  pinMode(PIN_BOMBA_AGUA, OUTPUT);
 
-  sensores[SENSOR_TEMPERATURA].pin    = PIN_SENSOR_TEMPERATURA;
-  sensores[SENSOR_TEMPERATURA].estado = ESTADO_SENSOR_OK;
+  sensores[SENSOR_HUMEDAD].pin = PIN_SENSOR_HUMEDAD;
+  sensores[SENSOR_HUMEDAD].estado = ESTADO_SENSOR_OK;
+  
+  sensores[SENSOR_LUZ].pin    = PIN_SENSOR_LUZ;
+  sensores[SENSOR_LUZ].estado = ESTADO_SENSOR_OK;
+
+  sensores[SENSOR_NIVEL_AGUA].pin = PIN_SENSOR_NIVEL_AGUA;
+  sensores[SENSOR_NIVEL_AGUA].estado = ESTADO_SENSOR_OK;
   
   // Inicializo el evento inicial
   current_state = ST_INIT;
@@ -116,7 +136,22 @@ void do_init()
 //----------------------------------------------
 long leerSensorTemperatura( )
 {
-  return analogRead(PIN_SENSOR_TEMPERATURA);
+  return analogRead(PIN_SENSOR_HUMEDAD);
+}
+
+long leerSensorHumedad()
+{
+  return analogRead(PIN_SENSOR_HUMEDAD);
+}
+
+long leerSensorLuz()
+{
+  return analogRead(PIN_SENSOR_LUZ);
+}
+
+long leerSensorNivelAgua()
+{
+  return analogRead(PIN_SENSOR_NIVEL_AGUA);
 }
 //----------------------------------------------
 
@@ -125,7 +160,6 @@ void apagar_leds( )
 {
   digitalWrite(PIN_LED_VERDE, false);
   digitalWrite(PIN_LED_AZUL , false);
-  digitalWrite(PIN_LED_ROJO , false);
 }
 //----------------------------------------------
 
@@ -134,7 +168,6 @@ void actualizar_indicador_led_azul( )
 {
   digitalWrite(PIN_LED_VERDE, false);
   digitalWrite(PIN_LED_AZUL , true );
-  digitalWrite(PIN_LED_ROJO , false);
 }
 //----------------------------------------------
 
@@ -143,49 +176,32 @@ void actualizar_indicador_led_verde( )
 {
   digitalWrite(PIN_LED_VERDE, true );
   digitalWrite(PIN_LED_AZUL , false);
-  digitalWrite(PIN_LED_ROJO , false);
-}
-//----------------------------------------------
-
-//----------------------------------------------
-void actualizar_indicador_led_rojo( )
-{
-  digitalWrite(PIN_LED_VERDE, false);
-  digitalWrite(PIN_LED_AZUL , false);
-  digitalWrite(PIN_LED_ROJO , true );
-}
-//----------------------------------------------
-
-//----------------------------------------------
-void actualizar_display_temperatura()
-{
-  // temperatura
 }
 //----------------------------------------------
 
 // ---------------------------------------------
-bool verificarEstadoSensorTemperatura( )
+bool verificarEstadoSensorHumedad()
 {
-  sensores[SENSOR_TEMPERATURA].valor_actual = leerSensorTemperatura( );
+  sensores[SENSOR_HUMEDAD].valor_actual = leerSensorHumedad();
   
-  int valor_actual = sensores[SENSOR_TEMPERATURA].valor_actual;
-  int valor_previo = sensores[SENSOR_TEMPERATURA].valor_previo;
+  int valor_actual = sensores[SENSOR_HUMEDAD].valor_actual;
+  int valor_previo = sensores[SENSOR_HUMEDAD].valor_previo;
   
   if( valor_actual != valor_previo )
   {
-    sensores[SENSOR_TEMPERATURA].valor_previo = valor_actual;
+    sensores[SENSOR_HUMEDAD].valor_previo = valor_actual;
     
-    if( valor_actual < UMBRAL_TEMPERATURA_FRIO )
+    if( valor_actual < UMBRAL_HUMEDAD_BAJA )
     {
-      new_event = EV_TEMP_COLD;
+      new_event = EV_LOW_MOISTURE;
     }
-    else if( (valor_actual >= UMBRAL_TEMPERATURA_FRIO)&& (valor_actual < UMBRAL_TEMPERATURA_MEDIO) )
+    else if( (valor_actual >= UMBRAL_HUMEDAD_BAJA) && (valor_actual < UMBRAL_HUMEDAD_MEDIA) )
     {
-      new_event = EV_TEMP_NICE;
+      new_event = EV_MEDIUM_MOISTURE;
     }
-    if( valor_actual >= UMBRAL_TEMPERATURA_MEDIO )
+    if( valor_actual >= UMBRAL_HUMEDAD_ALTA )
     {
-      new_event = EV_TEMP_HOT;
+      new_event = EV_HIGH_MOISTURE;
     }
     
     return true;
@@ -193,33 +209,61 @@ bool verificarEstadoSensorTemperatura( )
   
   return false;
 }
-//----------------------------------------------
 
-//----------------------------------------------
-bool verificarOtroSensor1()
+bool verificarEstadoSensorLuz()
 {
-  // Emulacion Sensor 1 ...
+  sensores[SENSOR_LUZ].valor_actual = leerSensorLuz();
+  
+  int valor_actual = sensores[SENSOR_LUZ].valor_actual;
+  int valor_previo = sensores[SENSOR_LUZ].valor_previo;
+  
+  if( valor_actual != valor_previo )
+  {
+    sensores[SENSOR_LUZ].valor_previo = valor_actual;
+    
+    if( valor_actual <= UMBRAL_LUZ_BAJA )
+    {
+      new_event = EV_NIGHTFALL;
+    }
+    else
+    {
+      new_event = EV_MORNING;
+    }
+    
+    return true;
+  }
+  
   return false;
 }
-//----------------------------------------------
 
-//----------------------------------------------
-bool verificarOtroSensor2()
+bool verificarEstadoSensorNivelAgua()
 {
-  // Emulacion Sensor 2 ...
+  sensores[SENSOR_NIVEL_AGUA].valor_actual = leerSensorNivelAgua();
+  
+  int valor_actual = sensores[SENSOR_NIVEL_AGUA].valor_actual;
+  int valor_previo = sensores[SENSOR_NIVEL_AGUA].valor_previo;
+  
+  if( valor_actual != valor_previo )
+  {
+    sensores[SENSOR_NIVEL_AGUA].valor_previo = valor_actual;
+    
+    if( valor_actual < UMBRAL_AGUA_BAJA )
+    {
+      new_event = EV_LOW_WATER;
+    }
+    else if( (valor_actual >= UMBRAL_AGUA_BAJA) && (valor_actual < UMBRAL_AGUA_MEDIA) )
+    {
+      new_event = EV_MEDIUM_WATER;
+    }
+    if( valor_actual >= UMBRAL_AGUA_ALTA )
+    {
+      new_event = EV_HIGH_WATER;
+    }
+    
+    return true;
+  }
+  
   return false;
-}
-//----------------------------------------------
-
-//----------------------------------------------
-bool enviar_mensaje()
-{
-}
-//----------------------------------------------
-
-//----------------------------------------------
-bool verificarSiHayRespuestaServidor()
-{
 }
 //----------------------------------------------
 
@@ -236,8 +280,7 @@ void get_new_event( )
     timeout = false;
     lct     = ct;
     
-    if( (verificarEstadoSensorTemperatura() == true) || (verificarOtroSensor1() == true) || (verificarOtroSensor2() == true) ||
-        (verificarSiHayRespuestaServidor() == true) )
+    if( (verificarEstadoSensorHumedad() == true) || (verificarEstadoSensorLuz() == true) || (verificarEstadoSensorNivelAgua() == true))
     {
       return;
     }
@@ -248,7 +291,7 @@ void get_new_event( )
 }
 //----------------------------------------------
 
-void init_()
+void initConfig()
 {
   DebugPrintEstado(states_s[current_state], events_s[new_event]);
   apagar_leds();
@@ -263,49 +306,72 @@ void none()
 {
 }
 
-void temp_cold_a()
+// IDLE
+//----------------------------------------------
+void low_sunlight()
 {
-  actualizar_indicador_led_azul( );
+  actualizar_indicador_led_azul();
+  current_state = ST_LOW_LIGHT;
+}
+
+void high_sunlight()
+{
+  actualizar_indicador_led_azul();
   current_state = ST_IDLE;
 }
 
-void temp_nice_a()
+void low_moisture() 
 {
-  actualizar_display_temperatura( );
-  actualizar_indicador_led_verde( );
+  actualizar_indicador_led_azul();
+  current_state = ST_LOW_HUMIDITY;
+}
+
+void medium_moisture() 
+{
+  actualizar_indicador_led_azul();
   current_state = ST_IDLE;
 }
 
-void temp_hot_a()
+void high_moisture() 
 {
-  actualizar_display_temperatura( );
-  actualizar_indicador_led_rojo( );
-  enviar_mensaje( );
-  current_state = ST_WAITING_RESPONSE;
+  actualizar_indicador_led_azul();
+  current_state = ST_IDLE;
 }
 
-void temp_hot()
+void low_water()
 {
-  actualizar_display_temperatura( );
-  actualizar_indicador_led_rojo( );
-  current_state = ST_WAITING_RESPONSE;
+  actualizar_indicador_led_azul();
+  current_state = ST_IDLE;
 }
 
-void temp_cold()
+void medium_water()
 {
-  actualizar_indicador_led_azul( );
-  current_state = ST_WAITING_RESPONSE;
+  actualizar_indicador_led_azul();
+  current_state = ST_IDLE;
 }
 
-void temp_nice()
+void high_water()
 {
-  actualizar_display_temperatura( );
-  actualizar_indicador_led_verde( );
-  current_state = ST_WAITING_RESPONSE;
+  actualizar_indicador_led_verde();
+  current_state = ST_WATERING;
 }
 
 //----------------------------------------------
-void maquina_estados_climatizador_ambiente( )
+
+
+//WATERING
+//----------------------------------------------
+void watering()
+{
+  actualizar_indicador_led_verde();
+  digitalWrite(PIN_BOMBA_AGUA, HIGH);
+  current_state = ST_WATERING;
+}
+//----------------------------------------------
+
+
+//----------------------------------------------
+void maquinaEstadosRegadorAutomatico( )
 {
   get_new_event();
 
@@ -320,7 +386,7 @@ void maquina_estados_climatizador_ambiente( )
   }
   else
   {
-    DebugPrintEstado(states_s[ST_ERROR], events_s[EV_UNKNOW]);
+    DebugPrintEstado(states_s[ST_ERROR], events_s[EV_UNKNOWN]);
   }
   
   // Consumo el evento...
@@ -340,7 +406,7 @@ void setup()
 //----------------------------------------------
 void loop()
 {
-  maquina_estados_climatizador_ambiente();
+  Serial.println(current_state);
+  maquinaEstadosRegadorAutomatico();
 }
 //----------------------------------------------
-

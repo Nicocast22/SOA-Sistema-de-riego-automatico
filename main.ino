@@ -73,6 +73,7 @@
 #define PIN_SENSOR_HUMEDAD                      	  A0
 #define PIN_SENSOR_LUZ                    			    A1               
 #define PIN_SENSOR_NIVEL_AGUA						            A2
+#define PIN_LED_NARANJA 	                          2
 #define PIN_BOMBA_AGUA                              4
 #define PIN_LED_VERDE                               6
 #define PIN_LED_AZUL	                              7
@@ -93,29 +94,28 @@ struct stSensor
 stSensor sensores[MAX_CANT_SENSORES];
 //----------------------------------------------
 
-enum states          { ST_INIT,  ST_IDLE , ST_LOW_HUMIDITY, ST_LOW_LIGHT, ST_WATERING, ST_RANNING, ST_DOOR_OPEN, ST_DOOR_CLOSED, ST_ERROR } current_state;
-String states_s [] = { "ST_INIT", "ST_IDLE" , "ST_LOW_HUMIDITY", "ST_LOW_LIGHT", "ST_WATERING", "ST_RANNING", "ST_DOOR_OPEN", "ST_DOOR_CLOSED", "ST_ERROR"};
+enum states          { ST_INIT,  ST_IDLE , ST_LOW_HUMIDITY, ST_LOW_LIGHT, ST_WATERING, ST_RAINING, ST_DOOR_OPEN, ST_ERROR } current_state;
+String states_s [] = { "ST_INIT", "ST_IDLE" , "ST_LOW_HUMIDITY", "ST_LOW_LIGHT", "ST_WATERING", "ST_RAINING", "ST_DOOR_OPEN", "ST_ERROR"};
 
-enum events          { EV_CONT,  EV_LOW_MOISTURE, EV_MEDIUM_MOISTURE, EV_HIGH_MOISTURE, EV_NIGHTFALL, EV_MORNING, EV_LOW_WATER, EV_MEDIUM_WATER, EV_HIGH_WATER, EV_TIMEOUT, EV_UNKNOWN, EV_RAINNING, EV_NOT_RAINING} new_event;
-String events_s [] = { "EV_CONT",  "EV_LOW_MOISTURE", "EV_MEDIUM_MOISTURE", "EV_HIGH_MOISTURE", "EV_NIGHTFALL", "EV_MORNING", "EV_LOW_WATER", "EV_MEDIUM_WATER", "EV_HIGH_WATER", "EV_TIMEOUT" , "EV_UNKNOWN", "EV_RAINNING", "EV_NOT_RAINING"};
+enum events          { EV_CONT,  EV_LOW_MOISTURE, EV_MEDIUM_MOISTURE, EV_HIGH_MOISTURE, EV_NIGHTFALL, EV_MORNING, EV_LOW_WATER, EV_MEDIUM_WATER, EV_HIGH_WATER, EV_TIMEOUT, EV_UNKNOWN, EV_RAINING, EV_NOT_RAINING} new_event;
+String events_s [] = { "EV_CONT",  "EV_LOW_MOISTURE", "EV_MEDIUM_MOISTURE", "EV_HIGH_MOISTURE", "EV_NIGHTFALL", "EV_MORNING", "EV_LOW_WATER", "EV_MEDIUM_WATER", "EV_HIGH_WATER", "EV_TIMEOUT" , "EV_UNKNOWN", "EV_RAINING", "EV_NOT_RAINING"};
 
-#define MAX_STATES 9
+#define MAX_STATES 8
 #define MAX_EVENTS 13
 
 typedef void (*transition)();
 
 transition state_table[MAX_STATES][MAX_EVENTS] =
 {
-      {initConfig   , error             , error             , error		        , error       , error		      , error        , error           , error         , none      , none       , none            , none          } , // state ST_INIT
       {none         , low_moisture      , medium_moisture   , high_moisture	  , low_sunlight, high_sunlight , low_water    , none            , none          , none      , none       , set_rain        , none          } , // state ST_IDLE
+      {initConfig   , error             , error             , error		        , error       , error		      , error        , error           , error         , none      , none       , none            , none          } , // state ST_INIT
       {none         , low_moisture      , medium_moisture   , high_moisture   , low_sunlight, high_sunlight , none         , none            , none          , none      , none       , set_rain        , none          } , // state ST_LOW_HUMIDITY
       {none         , none              , medium_moisture   , high_moisture   , none        , high_sunlight , none         , none            , high_water    , none      , none       , set_rain        , none          } , // state ST_LOW_LIGHT 
-      {none         , watering          , none              , high_moisture	  , watering    , high_sunlight , low_water    , medium_water    , watering      , none      , none       , none            , none          } , // state ST_WATERING
-      {none         , none              , none              , none         	  , none        , none          , open_door    , open_door       , close_door    , none      , none       , none            , set_not_rain  } , // state ST_RAINNING
-      {none         , none              , none              , none         	  , none        , none          , none         , none            , close_door    , none      , none       , none            , close_door    } , // state ST_DOOR_OPEN
-      {none         , none              , none              , none         	  , none        , none          , none         , none            , none          , none      , none       , set_rain        , none          } , // state ST_DOOR_CLOSED
+      {none         , watering          , none              , high_moisture	  , watering    , high_sunlight , low_water    , medium_water    , watering      , none      , none       , set_rain        , none          } , // state ST_WATERING
+      {none         , none              , none              , none         	  , none        , none          , open_door    , open_door       , close_door    , none      , none       , set_rain        , set_not_rain  } , // state ST_RAINING
+      {none         , none              , none              , none         	  , none        , none          , none         , none            , close_door    , none      , none       , none            , closeDoorRainStopped    } , // state ST_DOOR_OPEN
       {error        , error             , error             , error       	  , error       , error         , none         , error 	         , none          , none      , none       , none            , none          }   // state ST_ERROR
-     //EV_CONT      , EV_LOW_MOISTURE	  , EV_MEDIUM_MOISTURE, EV_HIGH_MOISTURE, EV_NIGHTFALL, EV_MORNING	  , EV_LOW_WATER , EV_MEDIUM_WATER , EV_HIGH_WATER , EV_TIMEOUT, EV_UNKNOWN , EV_RAINNING     , EV_NOT_RAINING
+     //EV_CONT      , EV_LOW_MOISTURE	  , EV_MEDIUM_MOISTURE, EV_HIGH_MOISTURE, EV_NIGHTFALL, EV_MORNING	  , EV_LOW_WATER , EV_MEDIUM_WATER , EV_HIGH_WATER , EV_TIMEOUT, EV_UNKNOWN , EV_RAINING     , EV_NOT_RAINING
 };
 
 bool timeout;
@@ -132,6 +132,7 @@ void do_init()
   
   pinMode(PIN_LED_VERDE, OUTPUT);
   pinMode(PIN_LED_AZUL , OUTPUT);
+  pinMode(PIN_LED_NARANJA, OUTPUT);
   pinMode(PIN_BOMBA_AGUA, OUTPUT);
   pinMode(PIN_SENSOR_LLUVIA, INPUT);
   pinMode(PIN_SERVO_TAPA, OUTPUT);
@@ -192,6 +193,7 @@ void apagar_leds( )
 {
   digitalWrite(PIN_LED_VERDE, false);
   digitalWrite(PIN_LED_AZUL , false);
+  digitalWrite(PIN_LED_NARANJA, false);
 }
 //----------------------------------------------
 
@@ -199,15 +201,24 @@ void apagar_leds( )
 void actualizar_indicador_led_azul( )
 {
   digitalWrite(PIN_LED_VERDE, false);
-  digitalWrite(PIN_LED_AZUL , true );
+  digitalWrite(PIN_LED_AZUL , true);
+  digitalWrite(PIN_LED_NARANJA , false);
 }
 //----------------------------------------------
 
 //----------------------------------------------
 void actualizar_indicador_led_verde( )
 {
-  digitalWrite(PIN_LED_VERDE, true );
+  digitalWrite(PIN_LED_VERDE, true);
   digitalWrite(PIN_LED_AZUL , false);
+  digitalWrite(PIN_LED_NARANJA , false);
+}
+
+void actualizar_indicador_led_naranja( )
+{
+  digitalWrite(PIN_LED_AZUL, false);
+  digitalWrite(PIN_LED_NARANJA , true);
+  digitalWrite(PIN_LED_VERDE , false);
 }
 
 void set_door(int angle){
@@ -258,12 +269,11 @@ bool verificarSensorLluvia(){
     sensores[SENSOR_LLUVIA].valor_previo = valor_actual;
 
     if(valor_actual == RAIN_TRUE){
-      new_event = EV_RAINNING;  
-      return true;
-    }else{
+      new_event = EV_RAINING;
+    } else{
       new_event = EV_NOT_RAINING; 
-      return true;
     }    
+    return true;
   }
   return false;
 }
@@ -417,21 +427,35 @@ void high_water()
 
 void set_rain()
 {
-  current_state = ST_RANNING;
+  actualizar_indicador_led_naranja();
+  current_state = ST_RAINING;
 }
 
-void set_not_rain(){
+void set_not_rain()
+{
+  actualizar_indicador_led_azul();
+  set_door(CLOSED_DOOR_ANGLE);
   current_state = ST_IDLE;
 }
 
-void open_door(){
+void open_door()
+{
   set_door(OPEN_DOOR_ANGLE);
   current_state = ST_DOOR_OPEN;
 }
 
-void close_door(){
+void close_door()
+{
+  actualizar_indicador_led_naranja();
   set_door(CLOSED_DOOR_ANGLE);
-  current_state = ST_DOOR_CLOSED;
+  current_state = ST_RAINING;
+}
+
+void closeDoorRainStopped() 
+{
+  actualizar_indicador_led_azul();
+  set_door(CLOSED_DOOR_ANGLE);
+  current_state = ST_IDLE;
 }
 
 //----------------------------------------------

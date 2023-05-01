@@ -5,7 +5,7 @@
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 
 // Interruptions counter
-#define howManyInterrupts  31 * 5
+#define howManyInterrupts  31 * 10
 
 // -------------------- Sensors' state --------------------
 #define OK_STATE_SENSOR                            108
@@ -33,7 +33,8 @@
 // -------------------- Servomotors' spin angle --------------------
 #define OPENED_TANK_DOOR_ANGLE                          91
 #define CLOSED_TANK_DOOR_ANGLE                          -90 
-
+#define WATER_MOVEMENT_ANGLE                             90
+#define WATER_MOVEMENT_MAX_ANGLE                         90
 
 // -------------------- Sensors --------------------
 #define MAX_SENSORS_AMOUNT                              5
@@ -57,6 +58,7 @@
 #define	PIN_DRAINAGE_SENSOR							                12
 #define PIN_YELLOW_LED							                    13
 
+
 // -------------------- Sensor structure --------------------
 struct stSensor
 {
@@ -71,7 +73,7 @@ stSensor sensors[MAX_SENSORS_AMOUNT];
 enum states          { ST_INIT  , ST_IDLE  , ST_LOW_HUMIDITY  , ST_LOW_LIGHT  , ST_WATERING  , ST_RAINING  , ST_DOOR_OPEN  , ST_DRAINING  , ST_NO_WATER  , ST_ERROR  } currentState;
 String states_s [] = { "ST_INIT", "ST_IDLE", "ST_LOW_HUMIDITY", "ST_LOW_LIGHT", "ST_WATERING", "ST_RAINING", "ST_DOOR_OPEN", "ST_DRAINING", "ST_NO_WATER", "ST_ERROR"};
 
-enum events          { EV_CONT  ,  EV_LOW_HUMIDITY  , EV_MEDIUM_HUMIDITY  , EV_HIGH_HUMIDITY  , EV_NIGHTFALL  , EV_MORNING  , EV_NO_WATER  , EV_LOW_WATER  , EV_MEDIUM_WATER  , EV_HIGH_WATER  , EV_RAINING  , EV_NOT_RAINING  , EV_DRAINAGE  , EV_STOP_DRAINAGE  , EV_TIMEOUT  , EV_UNKNOWN  } new_event;
+enum events          { EV_CONT  ,  EV_LOW_HUMIDITY  , EV_MEDIUM_HUMIDITY  , EV_HIGH_HUMIDITY  , EV_NIGHTFALL  , EV_MORNING  , EV_NO_WATER  , EV_LOW_WATER  , EV_MEDIUM_WATER  , EV_HIGH_WATER  , EV_RAINING  , EV_NOT_RAINING  , EV_DRAINAGE  , EV_STOP_DRAINAGE  , EV_TIMEOUT  , EV_UNKNOWN  } newEvent;
 String events_s [] = { "EV_CONT",  "EV_LOW_HUMIDITY", "EV_MEDIUM_HUMIDITY", "EV_HIGH_HUMIDITY", "EV_NIGHTFALL", "EV_MORNING", "EV_NO_WATER", "EV_LOW_WATER", "EV_MEDIUM_WATER", "EV_HIGH_WATER", "EV_RAINING", "EV_NOT_RAINING", "EV_DRAINAGE", "EV_STOP_DRAINAGE", "EV_TIMEOUT", "EV_UNKNOWN"};
 
 #define MAX_STATES 10
@@ -81,7 +83,7 @@ typedef void (*transition)();
 
 transition stateTable[MAX_STATES][MAX_EVENTS] =
 {
-      {none       , error           , error               , error		          , error         , error		      , none          , error         , error           , error         , none        , none                      , error       , error             , none        , none        } , // state ST_INIT
+      {initConfig , error           , error               , error		          , error         , error		      , none          , error         , error           , error         , none        , none                      , error       , error             , none        , none        } , // state ST_INIT
       {none       , lowHumidity     , mediumHumidity      , highHumidity	    , lowSunlight   , highSunlight  , noWater       , highSunlight  , none            , none          , raining     , none                      , draining    , none              , none        , none        } , // state ST_IDLE
       {none       , lowHumidity     , mediumHumidity      , highHumidity      , lowSunlight   , highSunlight  , noWater       , none          , none            , none          , raining     , none                      , draining    , none              , none        , none        } , // state ST_LOW_HUMIDITY
       {none       , none            , mediumHumidity      , highHumidity      , none          , highSunlight  , noWater       , none          , none            , highWater     , raining     , none                      , draining    , none              , none        , none        } , // state ST_LOW_LIGHT 
@@ -98,14 +100,9 @@ transition stateTable[MAX_STATES][MAX_EVENTS] =
 bool timeout;
 long lct;
 bool moveWater = false;
-bool rotatingLeft = true;
+int rotatingOffset = 10;
 Servo tankDoorServo;
 Servo waterMovementServo;
-
-void printState()
-{
-
-}
 
 // -------------------- Setup functions --------------------
 void setPinModes()
@@ -168,7 +165,7 @@ void configHWTimerInterruptions()
   OCR2A = 252;
 
   // Allow timer
-  sbi(TIMSK2,TOIE2); 
+  sbi(TIMSK2,TOIE2);
 }
 
 void configSWTimerInterruptions()
@@ -281,15 +278,15 @@ bool checkHumiditySensorState()
     
     if (currentValue < THRESHOLD_LOW_HUMIDITY)
     {
-      new_event = EV_LOW_HUMIDITY;
+      newEvent = EV_LOW_HUMIDITY;
     }
     else if (currentValue >= THRESHOLD_LOW_HUMIDITY && currentValue < THRESHOLD_MEDIUM_HUMIDITY)
     {
-      new_event = EV_MEDIUM_HUMIDITY;
+      newEvent = EV_MEDIUM_HUMIDITY;
     }
     else if (currentValue >= THRESHOLD_HIGH_HUMIDITY)
     {
-      new_event = EV_HIGH_HUMIDITY;
+      newEvent = EV_HIGH_HUMIDITY;
     }
     
     return true;
@@ -311,11 +308,11 @@ bool checkRainSensorState()
 
     if (currentValue == RAIN_SENSOR_HIGH)
     {
-      new_event = EV_RAINING;
+      newEvent = EV_RAINING;
     } 
     else
     {
-      new_event = EV_NOT_RAINING; 
+      newEvent = EV_NOT_RAINING; 
     }
 
     return true;
@@ -337,11 +334,11 @@ bool checkLightSensorState()
     
     if (currentValue <= THRESHOLD_LOW_LIGHT)
     {
-      new_event = EV_NIGHTFALL;
+      newEvent = EV_NIGHTFALL;
     }
     else
     {
-      new_event = EV_MORNING;
+      newEvent = EV_MORNING;
     }
     
     return true;
@@ -363,19 +360,24 @@ bool checkWaterLevelSensorState()
     
     if (currentValue <= THRESHOLD_NO_WATER) 
     {
-      new_event = EV_NO_WATER;
+      newEvent = EV_NO_WATER;
+      moveWater = false;
+
     }
     else if (currentValue > THRESHOLD_NO_WATER && currentValue <= THRESHOLD_LOW_WATER)
     {
-      new_event = EV_LOW_WATER;
+      newEvent = EV_LOW_WATER;
+      moveWater = false;
     }
     else if ((currentValue > THRESHOLD_LOW_WATER) && (currentValue < THRESHOLD_HIGH_WATER))
     {
-      new_event = EV_MEDIUM_WATER;
+      newEvent = EV_MEDIUM_WATER;
+      moveWater = true;
     }
     else if (currentValue >= THRESHOLD_HIGH_WATER)
     {
-      new_event = EV_HIGH_WATER;
+      newEvent = EV_HIGH_WATER;
+      moveWater = true;
     }
     
     return true;
@@ -397,11 +399,11 @@ bool checkDrainageSensorState()
 
     if (currentValue == DRAINAGE_SENSOR_HIGH)
     {
-      new_event = EV_DRAINAGE;
+      newEvent = EV_DRAINAGE;
     } 
     else 
     {
-      new_event = EV_STOP_DRAINAGE; 
+      newEvent = EV_STOP_DRAINAGE; 
     }    
 
     return true;
@@ -410,7 +412,7 @@ bool checkDrainageSensorState()
   return false;
 }
 
-void checkAllSensors()
+bool checkAllSensors()
 {
   return (checkHumiditySensorState() == true) || (checkLightSensorState() == true) || (checkWaterLevelSensorState() == true) || (checkRainSensorState() == true) || (checkDrainageSensorState() == true);
 }
@@ -435,17 +437,24 @@ void getNewEvent()
   }
   
   // Dummy event
-  new_event = EV_CONT;
+  newEvent = EV_CONT;
 }
 
 // -------------------- Error & void functions --------------------
 void error()
 {
-  // print error
+  Serial.println("There was an error. Please reset Arduino.");
 }
 
 void none()
 {
+}
+
+void initConfig()
+{
+  turnLedsOff();
+  updateBlueLed();
+  currentState = ST_IDLE;
 }
 
 // -------------------- State change functions --------------------
@@ -485,21 +494,18 @@ void lowWater()
 {
   updateBlueLed();
   digitalWrite(PIN_WATER_PUMP, LOW);
-  moveWater = false;
   currentState = ST_IDLE;
 }
 
 void mediumWater()
 {
   updateBlueLed();
-  moveWater = true;
   currentState = ST_IDLE;
 }
 
 void highWater()
 {
   updateGreenLed();
-  moveWater = true;
   currentState = ST_WATERING;
 }
 
@@ -560,7 +566,6 @@ void noWater()
 {
   updateBlueLed();
   digitalWrite(PIN_WATER_PUMP, LOW);
-  moveWater = false;
   currentState = ST_NO_WATER;
 }
 
@@ -569,32 +574,31 @@ void automaticWateringStateMachine()
 {
   getNewEvent();
 
-  if ((new_event >= 0) && (new_event < MAX_EVENTS) && (currentState >= 0) && (currentState < MAX_STATES))
+  if ((newEvent >= 0) && (newEvent < MAX_EVENTS) && (currentState >= 0) && (currentState < MAX_STATES))
   {
-    if (new_event != EV_CONT)
-    {
-      printState(states_s[currentState], events_s[new_event]);
-    }
-    
-    stateTable[currentState][new_event]();
-  }
-  else
-  {
-    printState(states_s[ST_ERROR], events_s[EV_UNKNOWN]);
+    stateTable[currentState][newEvent]();
   }
   
-  new_event = EV_CONT;
+  newEvent = EV_CONT;
 }
 
 // -------------------- TIMER2 interruption handler --------------------
 int counterICQ = 0;
+int offset = 0;
 ISR(TIMER2_OVF_vect)
 {
   counterICQ++;
-  if(moveWater && counterICQ == howManyInterrupts) {
+  if(counterICQ == howManyInterrupts) {
     counterICQ = 0;
-    waterMovementServo.write(rotatingLeft ? 0 : 179);
-    rotatingLeft = !rotatingLeft;
+    if(moveWater)
+    {
+      waterMovementServo.write(WATER_MOVEMENT_ANGLE + offset);
+      offset += rotatingOffset;
+      if(offset == WATER_MOVEMENT_MAX_ANGLE)
+      {
+        offset = -offset;
+      }
+    }
   }
 }
 

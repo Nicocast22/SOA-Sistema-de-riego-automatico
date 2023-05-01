@@ -1,5 +1,6 @@
 #include <Servo.h>
 
+
 // Habilitacion de debug para la impresion por el puerto serial ...
 //----------------------------------------------
 #define SERIAL_DEBUG_ENABLED 0
@@ -27,6 +28,14 @@
       }
 //----------------------------------------------
 
+#define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
+#define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
+//Variables globales
+
+// Contamos la cantidad de interrupciones
+#define howManyInterrupts  31 * 5
+bool moveWater = false;
+bool rotatingLeft = true;
 
 //----------------------------------------------
 // Estado de un sensor ...
@@ -77,6 +86,7 @@
 #define PIN_SENSOR_LUZ                    			    A1               
 #define PIN_SENSOR_NIVEL_AGUA						            A2
 #define PIN_LED_NARANJA 	                          2
+#define PIN_SERVO_MOVIMIENTO_AGUA 	                9
 #define PIN_BOMBA_AGUA                              4
 #define PIN_LED_VERDE                               6
 #define PIN_LED_AZUL	                              7
@@ -130,6 +140,7 @@ bool temperatura;
 bool humedad;
 bool luz;
 Servo servo;
+Servo waterMovementServo;
 
 //----------------------------------------------
 void do_init()
@@ -143,6 +154,7 @@ void do_init()
   pinMode(PIN_BOMBA_AGUA, OUTPUT);
   pinMode(PIN_SENSOR_LLUVIA, INPUT);
   pinMode(PIN_SERVO_TAPA, OUTPUT);
+  pinMode(PIN_SERVO_MOVIMIENTO_AGUA, OUTPUT);
   pinMode(PIN_SENSOR_DRENADOR, INPUT);
 
   sensores[SENSOR_HUMEDAD].pin        = PIN_SENSOR_HUMEDAD;
@@ -161,14 +173,37 @@ void do_init()
   sensores[SENSOR_DRENADOR].estado      = ESTADO_SENSOR_OK;
 
   servo.attach(PIN_SERVO_TAPA);
-
+  waterMovementServo.attach(PIN_SERVO_MOVIMIENTO_AGUA);
   
   // Inicializo el evento inicial
   current_state = ST_INIT;
+
+  // Setup TIMER2
+  TIMSK2 = 0;
+  cbi(ASSR, AS2);
+
+  // Limpiamos registros de timers
+  TCCR2B = 0;  
+  TCCR2A = 0;
+  TCNT2 = 0;
+
+  sbi(TCCR2A, WGM20);
+
+  sbi(TCCR2B, WGM22); 
+
+  // Settings timer
+  sbi(TCCR2B,CS22); //set this bit
+  sbi(TCCR2B,CS21); //set this bit
+  sbi(TCCR2B,CS20); //set this bit
+
+  OCR2A = 252;
+
+  // Habilitamos el timer
+  sbi(TIMSK2,TOIE2); 
+  //sei();
   
   timeout = false;
   lct     = millis();
-
 }
 //----------------------------------------------
 
@@ -466,18 +501,21 @@ void low_water()
 {
   actualizar_indicador_led_azul();
   digitalWrite(PIN_BOMBA_AGUA, LOW);
+  moveWater = false;
   current_state = ST_IDLE;
 }
 
 void medium_water()
 {
   actualizar_indicador_led_azul();
+  moveWater = true;
   current_state = ST_IDLE;
 }
 
 void high_water()
 {
   actualizar_indicador_led_verde();
+  moveWater = true;
   current_state = ST_WATERING;
 }
 
@@ -547,11 +585,12 @@ void noWater()
 {
   actualizar_indicador_led_azul();
   digitalWrite(PIN_BOMBA_AGUA, LOW);
+  moveWater = false;
   current_state = ST_NO_WATER;
 }
 
 //----------------------------------------------
-void maquinaEstadosRegadorAutomatico( )
+void maquinaEstadosRegadorAutomatico()
 {
   get_new_event();
 
@@ -583,10 +622,24 @@ void setup()
 }
 //----------------------------------------------
 
+int counterICQ = 0;
+
+ISR(TIMER2_OVF_vect)
+{
+  counterICQ++;
+  if(moveWater && counterICQ == howManyInterrupts) {
+    counterICQ = 0;
+    Serial.println("CAMBIANDO DIRECCION DE SERVO");
+    waterMovementServo.write(rotatingLeft ? 0 : 179);
+    rotatingLeft = !rotatingLeft;
+  }
+}
+
 //----------------------------------------------
 void loop()
 {
-  Serial.println(current_state);
+  //Serial.println(current_state);
+  Serial.println(moveWater);
   maquinaEstadosRegadorAutomatico();
 }
 //----------------------------------------------

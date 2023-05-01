@@ -31,10 +31,13 @@
 #define DRAINAGE_SENSOR_HIGH                            1
 
 // -------------------- Servomotors' spin angle --------------------
+#define SERVO_STARTING_ANGLE                            0
 #define OPENED_TANK_DOOR_ANGLE                          91
-#define CLOSED_TANK_DOOR_ANGLE                          -90 
-#define WATER_MOVEMENT_ANGLE                             90
-#define WATER_MOVEMENT_MAX_ANGLE                         90
+#define CLOSED_TANK_DOOR_ANGLE                          -90
+#define OPENED_DRAINAGE_VALVE_ANGLE                     91
+#define CLOSED_DRAINAGE_VALVE_ANGLE                     -90  
+#define WATER_MOVEMENT_ANGLE                            90
+#define WATER_MOVEMENT_MAX_ANGLE                        90
 
 // -------------------- Sensors --------------------
 #define MAX_SENSORS_AMOUNT                              5
@@ -50,6 +53,7 @@
 #define PIN_WATER_LEVEL_SENSOR						              A2
 #define PIN_ORANGE_LED 	                                2
 #define PIN_WATER_PUMP                                  4
+#define PIN_DRAINAGE_VALVE_SERVO                        5
 #define PIN_GREEN_LED                                   6
 #define PIN_BLUE_LED	                                  7
 #define PIN_RAIN_SENSOR                                 8
@@ -103,6 +107,7 @@ bool moveWater = false;
 int rotatingOffset = 10;
 Servo tankDoorServo;
 Servo waterMovementServo;
+Servo drainageValveServo;
 
 // -------------------- Setup functions --------------------
 void setPinModes()
@@ -114,6 +119,7 @@ void setPinModes()
   pinMode(PIN_WATER_PUMP, OUTPUT);
   pinMode(PIN_RAIN_SENSOR, INPUT);
   pinMode(PIN_TANK_DOOR_SERVO, OUTPUT);
+  pinMode(PIN_DRAINAGE_VALVE_SERVO, OUTPUT);
   pinMode(PIN_WATER_MOVEMENT_SERVO, OUTPUT);
   pinMode(PIN_DRAINAGE_SENSOR, INPUT);
 }
@@ -138,7 +144,13 @@ void setSensors()
 
 void attachServos()
 {
+  // Initial positions
+  tankDoorServo.write(SERVO_STARTING_ANGLE);
+  drainageValveServo.write(SERVO_STARTING_ANGLE);
+  waterMovementServo.write(SERVO_STARTING_ANGLE);
+
   tankDoorServo.attach(PIN_TANK_DOOR_SERVO);
+  drainageValveServo.attach(PIN_DRAINAGE_VALVE_SERVO);
   waterMovementServo.attach(PIN_WATER_MOVEMENT_SERVO);
 }
 
@@ -258,11 +270,21 @@ void updateYellowLed()
   digitalWrite(PIN_BLUE_LED , false);
 }
 
-// -------------------- Tank door functions --------------------
-void setTankDoor(int angle){
+// -------------------- Servo movement functions --------------------
+void setTankDoorServo(int angle)
+{
   tankDoorServo.write(angle);
 }
 
+void setDrainageValveServo(int angle)
+{
+  drainageValveServo.write(angle);
+}
+
+void setWaterMovementServo(int angle)
+{
+  waterMovementServo.write(WATER_MOVEMENT_ANGLE + angle);
+}
 
 // -------------------- Sensor checking functions --------------------
 bool checkHumiditySensorState()
@@ -519,27 +541,27 @@ void raining()
 void notRaining()
 {
   updateBlueLed();
-  setTankDoor(CLOSED_TANK_DOOR_ANGLE);
+  setTankDoorServo(CLOSED_TANK_DOOR_ANGLE);
   currentState = ST_IDLE;
 }
 
 void openTankDoor()
 {
-  setTankDoor(OPENED_TANK_DOOR_ANGLE);
+  setTankDoorServo(OPENED_TANK_DOOR_ANGLE);
   currentState = ST_DOOR_OPEN;
 }
 
 void closeTankDoor()
 {
   updateOrangeLed();
-  setTankDoor(CLOSED_TANK_DOOR_ANGLE);
+  setTankDoorServo(CLOSED_TANK_DOOR_ANGLE);
   currentState = ST_RAINING;
 }
 
 void closeTankDoorRainStopped() 
 {
   updateBlueLed();
-  setTankDoor(CLOSED_TANK_DOOR_ANGLE);
+  setTankDoorServo(CLOSED_TANK_DOOR_ANGLE);
   currentState = ST_IDLE;
 }
 
@@ -553,12 +575,14 @@ void watering()
 void draining()
 {
   updateYellowLed();
+  setDrainageValveServo(OPENED_DRAINAGE_VALVE_ANGLE);
   currentState = ST_DRAINING;
 }
 
 void stopDraining()
 {
   updateBlueLed();
+  setDrainageValveServo(CLOSED_DRAINAGE_VALVE_ANGLE);
   currentState = ST_IDLE;
 }
 
@@ -592,7 +616,7 @@ ISR(TIMER2_OVF_vect)
     counterICQ = 0;
     if(moveWater)
     {
-      waterMovementServo.write(WATER_MOVEMENT_ANGLE + offset);
+      setWaterMovementServo(offset);
       offset += rotatingOffset;
       if(offset == WATER_MOVEMENT_MAX_ANGLE)
       {

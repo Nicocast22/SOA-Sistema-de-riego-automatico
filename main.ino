@@ -1,188 +1,157 @@
 #include <Servo.h>
 
-
-// Habilitacion de debug para la impresion por el puerto serial ...
-//----------------------------------------------
-#define SERIAL_DEBUG_ENABLED 0
-
-#if SERIAL_DEBUG_ENABLED
-  #define DebugPrint(str)\
-      {\
-        Serial.println(str);\
-      }
-#else
-  #define DebugPrint(str)
-#endif
-
-#define DebugPrintEstado(estado,evento)\
-      {\
-        String est = estado;\
-        String evt = evento;\
-        String str;\
-        str = "-----------------------------------------------------";\
-        DebugPrint(str);\
-        str = "EST-> [" + est + "]: " + "EVT-> [" + evt + "].";\
-        DebugPrint(str);\
-        str = "-----------------------------------------------------";\
-        DebugPrint(str);\
-      }
-//----------------------------------------------
-
+// Bits setup for TIMER2 interruptions
 #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
-//Variables globales
 
-// Contamos la cantidad de interrupciones
+// Interruptions counter
 #define howManyInterrupts  31 * 5
-bool moveWater = false;
-bool rotatingLeft = true;
 
-//----------------------------------------------
-// Estado de un sensor ...
-#define ESTADO_SENSOR_OK                            108
-#define ESTADO_SENSOR_ERROR                         666
-//----------------------------------------------
+// -------------------- Sensors' state --------------------
+#define OK_STATE_SENSOR                            108
+#define ERROR_STATE_SENSOR                         666
+// ----------------------------------------------
 
-//----------------------------------------------
-// Estado de un mensaje ...
-#define MENSAJE_ENVIADO_OK                          10
-#define MENSAJE_ENVIADO_ERROR                       666
-//----------------------------------------------
+// -------------------- Thresholds --------------------
+#define THRESHOLD_TIMEOUT                   10
 
-// Otras constantes ....
-//----------------------------------------------
-#define UMBRAL_DIFERENCIA_TIMEOUT                   10
-// Humedad
-#define UMBRAL_HUMEDAD_BAJA                      		250
-#define UMBRAL_HUMEDAD_MEDIA                      	500
-#define UMBRAL_HUMEDAD_ALTA                      		700
-// Luz
-#define UMBRAL_LUZ_BAJA                   	    		200
-#define UMBRAL_LUZ_ALTA                   	    		400
-// Agua   
-#define UMBRAL_SIN_AGUA                             40
-#define UMBRAL_AGUA_BAJA                   	    		100
-#define UMBRAL_AGUA_MEDIA                       		500
-#define UMBRAL_AGUA_ALTA                   	    		1000
-//Lluvia
-#define RAIN_TRUE                                   1
-//Tapa
-#define OPEN_DOOR_ANGLE                             91
-#define CLOSED_DOOR_ANGLE                           -90 
-//Drenaje
-#define DRAINAGE_TRUE                               1
+#define THRESHOLD_LOW_HUMIDITY                      		250
+#define THRESHOLD_MEDIUM_HUMIDITY                      	500
+#define THRESHOLD_HIGH_HUMIDITY                      		700
 
-// Sensores
-#define MAX_CANT_SENSORES                           5
+#define THRESHOLD_LOW_LIGHT                   	    		200
+#define THRESHOLD_HIGH_LIGHT                   	    		400
+ 
+#define THRESHOLD_NO_WATER                              40
+#define THRESHOLD_LOW_WATER                   	    		100
+#define THRESHOLD_MEDIUM_WATER                       		500
+#define THRESHOLD_HIGH_WATER                   	    		1000
 
-#define SENSOR_HUMEDAD                           		0
-#define SENSOR_LUZ                            			1
-#define SENSOR_NIVEL_AGUA                           2
-#define SENSOR_LLUVIA                               3
-#define	SENSOR_DRENADOR								              4
+#define RAIN_SENSOR_HIGH                                1
+#define DRAINAGE_SENSOR_HIGH                            1
 
-// Pines
-#define PIN_SENSOR_HUMEDAD                      	  A0
-#define PIN_SENSOR_LUZ                    			    A1               
-#define PIN_SENSOR_NIVEL_AGUA						            A2
-#define PIN_LED_NARANJA 	                          2
-#define PIN_SERVO_MOVIMIENTO_AGUA 	                9
-#define PIN_BOMBA_AGUA                              4
-#define PIN_LED_VERDE                               6
-#define PIN_LED_AZUL	                              7
-#define PIN_SENSOR_LLUVIA                           8
-#define PIN_SERVO_TAPA                              10
-#define	PIN_SENSOR_DRENADOR							            12
-#define PIN_LED_AMARILLO							              13
+// -------------------- Servomotors' spin angle --------------------
+#define OPENED_TANK_DOOR_ANGLE                          91
+#define CLOSED_TANK_DOOR_ANGLE                          -90 
 
-//----------------------------------------------
 
-//----------------------------------------------
+// -------------------- Sensors --------------------
+#define MAX_SENSORS_AMOUNT                              5
+#define SENSOR_HUMIDITY                           		  0
+#define SENSOR_LIGHT                            			  1
+#define SENSOR_WATER_LEVEL                              2
+#define SENSOR_RAIN                                     3
+#define	SENSOR_DRAINAGE								                  4
+
+// -------------------- Pins --------------------
+#define PIN_HUMIDITY_SENSOR                      	      A0
+#define PIN_LIGHT_SENSOR                    			      A1               
+#define PIN_WATER_LEVEL_SENSOR						              A2
+#define PIN_ORANGE_LED 	                                2
+#define PIN_WATER_PUMP                                  4
+#define PIN_GREEN_LED                                   6
+#define PIN_BLUE_LED	                                  7
+#define PIN_RAIN_SENSOR                                 8
+#define PIN_WATER_MOVEMENT_SERVO 	                      9
+#define PIN_TANK_DOOR_SERVO                             10
+#define	PIN_DRAINAGE_SENSOR							                12
+#define PIN_YELLOW_LED							                    13
+
+// -------------------- Sensor structure --------------------
 struct stSensor
 {
-  int  pin;
-  int  estado;
-  long valor_actual;
-  long valor_previo;
+  int pin;
+  int state;
+  long currentValue;
+  long prevValue;
 };
-stSensor sensores[MAX_CANT_SENSORES];
-//----------------------------------------------
+stSensor sensors[MAX_SENSORS_AMOUNT];
 
-enum states          { ST_INIT,  ST_IDLE , ST_LOW_HUMIDITY, ST_LOW_LIGHT, ST_WATERING, ST_RAINING, ST_DOOR_OPEN, ST_DRAINING, ST_NO_WATER, ST_ERROR } current_state;
-String states_s [] = { "ST_INIT", "ST_IDLE" , "ST_LOW_HUMIDITY", "ST_LOW_LIGHT", "ST_WATERING", "ST_RAINING", "ST_DOOR_OPEN", "ST_DRAINING", "ST_NO_WATER", "ST_ERROR"};
+// -------------------- States & events --------------------
+enum states          { ST_INIT  , ST_IDLE  , ST_LOW_HUMIDITY  , ST_LOW_LIGHT  , ST_WATERING  , ST_RAINING  , ST_DOOR_OPEN  , ST_DRAINING  , ST_NO_WATER  , ST_ERROR  } currentState;
+String states_s [] = { "ST_INIT", "ST_IDLE", "ST_LOW_HUMIDITY", "ST_LOW_LIGHT", "ST_WATERING", "ST_RAINING", "ST_DOOR_OPEN", "ST_DRAINING", "ST_NO_WATER", "ST_ERROR"};
 
-enum events          { EV_CONT,  EV_LOW_MOISTURE, EV_MEDIUM_MOISTURE, EV_HIGH_MOISTURE, EV_NIGHTFALL, EV_MORNING, EV_LOW_WATER, EV_MEDIUM_WATER, EV_HIGH_WATER, EV_TIMEOUT, EV_UNKNOWN, EV_RAINING, EV_NOT_RAINING, EV_DRAINAGE, EV_STOP_DRAINAGE, EV_NO_WATER} new_event;
-String events_s [] = { "EV_CONT",  "EV_LOW_MOISTURE", "EV_MEDIUM_MOISTURE", "EV_HIGH_MOISTURE", "EV_NIGHTFALL", "EV_MORNING", "EV_LOW_WATER", "EV_MEDIUM_WATER", "EV_HIGH_WATER", "EV_TIMEOUT" , "EV_UNKNOWN", "EV_RAINING", "EV_NOT_RAINING", "EV_DRAINAGE", "EV_STOP_DRAINAGE", "EV_NO_WATER"};
+enum events          { EV_CONT  ,  EV_LOW_HUMIDITY  , EV_MEDIUM_HUMIDITY  , EV_HIGH_HUMIDITY  , EV_NIGHTFALL  , EV_MORNING  , EV_NO_WATER  , EV_LOW_WATER  , EV_MEDIUM_WATER  , EV_HIGH_WATER  , EV_RAINING  , EV_NOT_RAINING  , EV_DRAINAGE  , EV_STOP_DRAINAGE  , EV_TIMEOUT  , EV_UNKNOWN  } new_event;
+String events_s [] = { "EV_CONT",  "EV_LOW_HUMIDITY", "EV_MEDIUM_HUMIDITY", "EV_HIGH_HUMIDITY", "EV_NIGHTFALL", "EV_MORNING", "EV_NO_WATER", "EV_LOW_WATER", "EV_MEDIUM_WATER", "EV_HIGH_WATER", "EV_RAINING", "EV_NOT_RAINING", "EV_DRAINAGE", "EV_STOP_DRAINAGE", "EV_TIMEOUT", "EV_UNKNOWN"};
 
 #define MAX_STATES 10
 #define MAX_EVENTS 16
 
 typedef void (*transition)();
 
-transition state_table[MAX_STATES][MAX_EVENTS] =
+transition stateTable[MAX_STATES][MAX_EVENTS] =
 {
-      {initConfig   , error             , error             , error		        , error       , error		      , error        , error           , error         , none      , none       , none            , none                  , error       , error          , none      } , // state ST_INIT
-      {none         , low_moisture      , medium_moisture   , high_moisture	  , low_sunlight, high_sunlight , low_water    , none            , none          , none      , none       , set_rain        , none                  , draining    , none           , noWater   } , // state ST_IDLE
-      {none         , low_moisture      , medium_moisture   , high_moisture   , low_sunlight, high_sunlight , none         , none            , none          , none      , none       , set_rain        , none                  , draining    , none           , noWater   } , // state ST_LOW_HUMIDITY
-      {none         , none              , medium_moisture   , high_moisture   , none        , high_sunlight , none         , none            , high_water    , none      , none       , set_rain        , none                  , draining    , none           , noWater   } , // state ST_LOW_LIGHT 
-      {none         , watering          , none              , high_moisture	  , watering    , high_sunlight , low_water    , none            , watering      , none      , none       , set_rain        , none                  , none        , none           , noWater   } , // state ST_WATERING
-      {none         , none              , none              , none         	  , none        , none          , open_door    , open_door       , close_door    , none      , none       , set_rain        , set_not_rain          , none        , none           , open_door } , // state ST_RAINING
-      {none         , none              , none              , none         	  , none        , none          , none         , none            , close_door    , none      , none       , none            , closeDoorRainStopped  , none        , none           , none      } , // state ST_DOOR_OPEN
-      {none         , none              , none              , none         	  , none        , none          , low_water    , none            , none          , none      , none       , none            , none                  , draining    , stopDraining   , noWater   } , // state ST_DRAINING
-      {none         , none              , none              , none         	  , none        , none          , low_water    , medium_water    , high_water    , none      , none       , set_rain        , none                  , none        , none           , noWater   } , // state ST_NO_WATER
-      {error        , error             , error             , error       	  , error       , error         , none         , error 	         , none          , none      , none       , none            , none                  , none        , none           , none      }   // state ST_ERROR
-     //EV_CONT      , EV_LOW_MOISTURE	  , EV_MEDIUM_MOISTURE, EV_HIGH_MOISTURE, EV_NIGHTFALL, EV_MORNING	  , EV_LOW_WATER , EV_MEDIUM_WATER , EV_HIGH_WATER , EV_TIMEOUT, EV_UNKNOWN , EV_RAINING      , EV_NOT_RAINING        , EV_DRAINAGE , EV_STOP_DRAINAGE, EV_NO_WATER
+      {none       , error           , error               , error		          , error         , error		      , none          , error         , error           , error         , none        , none                      , error       , error             , none        , none        } , // state ST_INIT
+      {none       , lowHumidity     , mediumHumidity      , highHumidity	    , lowSunlight   , highSunlight  , noWater       , highSunlight  , none            , none          , raining     , none                      , draining    , none              , none        , none        } , // state ST_IDLE
+      {none       , lowHumidity     , mediumHumidity      , highHumidity      , lowSunlight   , highSunlight  , noWater       , none          , none            , none          , raining     , none                      , draining    , none              , none        , none        } , // state ST_LOW_HUMIDITY
+      {none       , none            , mediumHumidity      , highHumidity      , none          , highSunlight  , noWater       , none          , none            , highWater     , raining     , none                      , draining    , none              , none        , none        } , // state ST_LOW_LIGHT 
+      {none       , watering        , none                , highHumidity	    , watering      , highSunlight  , noWater       , lowWater      , none            , watering      , raining     , none                      , none        , none              , none        , none        } , // state ST_WATERING
+      {none       , none            , none                , none         	    , none          , none          , openTankDoor  , openTankDoor  , openTankDoor    , closeTankDoor , raining     , notRaining                , none        , none              , none        , none        } , // state ST_RAINING
+      {none       , none            , none                , none         	    , none          , none          , none          , none          , none            , closeTankDoor , none        , closeTankDoorRainStopped  , none        , none              , none        , none        } , // state ST_DOOR_OPEN
+      {none       , none            , none                , none         	    , none          , none          , noWater       , lowWater      , none            , none          , none        , none                      , draining    , stopDraining      , none        , none        } , // state ST_DRAINING
+      {none       , none            , none                , none         	    , none          , none          , noWater       , lowWater      , mediumWater     , highWater     , raining     , none                      , none        , none              , none        , none        } , // state ST_NO_WATER
+      {error      , error           , error               , error       	    , error         , error         , none          , none          , error 	        , none          , none        , none                      , none        , none              , none        , none        }   // state ST_ERROR
+     //EV_CONT    , EV_LOW_HUMIDITY , EV_MEDIUM_HUMIDITY  , EV_HIGH_HUMIDITY  , EV_NIGHTFALL  , EV_MORNING	  , EV_NO_WATER   , EV_LOW_WATER  , EV_MEDIUM_WATER , EV_HIGH_WATER , EV_RAINING  , EV_NOT_RAINING            , EV_DRAINAGE , EV_STOP_DRAINAGE  , EV_TIMEOUT  , EV_UNKNOWN  
 };
 
+// -------------------- Global variables --------------------
 bool timeout;
 long lct;
-bool temperatura;
-bool humedad;
-bool luz;
-Servo servo;
+bool moveWater = false;
+bool rotatingLeft = true;
+Servo tankDoorServo;
 Servo waterMovementServo;
 
-//----------------------------------------------
-void do_init()
+void printState()
 {
-  Serial.begin(9600);
+
+}
+
+// -------------------- Setup functions --------------------
+void setPinModes()
+{
+  pinMode(PIN_GREEN_LED, OUTPUT);
+  pinMode(PIN_BLUE_LED , OUTPUT);
+  pinMode(PIN_ORANGE_LED, OUTPUT);
+  pinMode(PIN_YELLOW_LED, OUTPUT);
+  pinMode(PIN_WATER_PUMP, OUTPUT);
+  pinMode(PIN_RAIN_SENSOR, INPUT);
+  pinMode(PIN_TANK_DOOR_SERVO, OUTPUT);
+  pinMode(PIN_WATER_MOVEMENT_SERVO, OUTPUT);
+  pinMode(PIN_DRAINAGE_SENSOR, INPUT);
+}
+
+void setSensors()
+{
+  sensors[SENSOR_HUMIDITY].pin      = PIN_HUMIDITY_SENSOR;
+  sensors[SENSOR_HUMIDITY].state    = OK_STATE_SENSOR;
   
-  pinMode(PIN_LED_VERDE, OUTPUT);
-  pinMode(PIN_LED_AZUL , OUTPUT);
-  pinMode(PIN_LED_NARANJA, OUTPUT);
-  pinMode(PIN_LED_AMARILLO, OUTPUT);
-  pinMode(PIN_BOMBA_AGUA, OUTPUT);
-  pinMode(PIN_SENSOR_LLUVIA, INPUT);
-  pinMode(PIN_SERVO_TAPA, OUTPUT);
-  pinMode(PIN_SERVO_MOVIMIENTO_AGUA, OUTPUT);
-  pinMode(PIN_SENSOR_DRENADOR, INPUT);
+  sensors[SENSOR_LIGHT].pin         = PIN_LIGHT_SENSOR;
+  sensors[SENSOR_LIGHT].state       = OK_STATE_SENSOR;
 
-  sensores[SENSOR_HUMEDAD].pin        = PIN_SENSOR_HUMEDAD;
-  sensores[SENSOR_HUMEDAD].estado     = ESTADO_SENSOR_OK;
-  
-  sensores[SENSOR_LUZ].pin            = PIN_SENSOR_LUZ;
-  sensores[SENSOR_LUZ].estado         = ESTADO_SENSOR_OK;
+  sensors[SENSOR_WATER_LEVEL].pin   = PIN_WATER_LEVEL_SENSOR;
+  sensors[SENSOR_WATER_LEVEL].state = OK_STATE_SENSOR;
 
-  sensores[SENSOR_NIVEL_AGUA].pin     = PIN_SENSOR_NIVEL_AGUA;
-  sensores[SENSOR_NIVEL_AGUA].estado  = ESTADO_SENSOR_OK;
+  sensors[SENSOR_RAIN].pin          = PIN_RAIN_SENSOR;
+  sensors[SENSOR_RAIN].state        = OK_STATE_SENSOR;
 
-  sensores[SENSOR_LLUVIA].pin         = PIN_SENSOR_LLUVIA;
-  sensores[SENSOR_LLUVIA].estado      = ESTADO_SENSOR_OK;
+  sensors[SENSOR_DRAINAGE].pin      = PIN_DRAINAGE_SENSOR;
+  sensors[SENSOR_DRAINAGE].state    = OK_STATE_SENSOR;
+}
 
-  sensores[SENSOR_DRENADOR].pin         = PIN_SENSOR_DRENADOR;
-  sensores[SENSOR_DRENADOR].estado      = ESTADO_SENSOR_OK;
+void attachServos()
+{
+  tankDoorServo.attach(PIN_TANK_DOOR_SERVO);
+  waterMovementServo.attach(PIN_WATER_MOVEMENT_SERVO);
+}
 
-  servo.attach(PIN_SERVO_TAPA);
-  waterMovementServo.attach(PIN_SERVO_MOVIMIENTO_AGUA);
-  
-  // Inicializo el evento inicial
-  current_state = ST_INIT;
-
+void configHWTimerInterruptions()
+{
   // Setup TIMER2
   TIMSK2 = 0;
   cbi(ASSR, AS2);
 
-  // Limpiamos registros de timers
+  // Clean registers
   TCCR2B = 0;  
   TCCR2A = 0;
   TCNT2 = 0;
@@ -191,129 +160,136 @@ void do_init()
 
   sbi(TCCR2B, WGM22); 
 
-  // Settings timer
-  sbi(TCCR2B,CS22); //set this bit
-  sbi(TCCR2B,CS21); //set this bit
-  sbi(TCCR2B,CS20); //set this bit
+  // Set timer bits
+  sbi(TCCR2B,CS22);
+  sbi(TCCR2B,CS21);
+  sbi(TCCR2B,CS20);
 
   OCR2A = 252;
 
-  // Habilitamos el timer
+  // Allow timer
   sbi(TIMSK2,TOIE2); 
-  //sei();
-  
+}
+
+void configSWTimerInterruptions()
+{
   timeout = false;
   lct     = millis();
 }
-//----------------------------------------------
 
-//----------------------------------------------
-long leerSensorTemperatura( )
+void initialSetup()
 {
-  return analogRead(PIN_SENSOR_HUMEDAD);
+  Serial.begin(9600);
+
+  setPinModes();
+  setSensors();
+  attachServos();
+  configHWTimerInterruptions();
+  configSWTimerInterruptions();
+
+  turnLedsOff();
+
+  // Initialize starting state
+  currentState = ST_INIT;
 }
 
-long leerSensorHumedad()
+// -------------------- Reading functions --------------------
+long readHumiditySensor()
 {
-  return analogRead(PIN_SENSOR_HUMEDAD);
+  return analogRead(PIN_HUMIDITY_SENSOR);
 }
 
-long leerSensorLuz()
+long readLightSensor()
 {
-  return analogRead(PIN_SENSOR_LUZ);
+  return analogRead(PIN_LIGHT_SENSOR);
 }
 
-long leerSensorNivelAgua()
+long readWaterLevelSensor()
 {
-  return analogRead(PIN_SENSOR_NIVEL_AGUA);
+  return analogRead(PIN_WATER_LEVEL_SENSOR);
 }
 
-int leerSensorLluvia(){
-  return digitalRead(PIN_SENSOR_LLUVIA);
-}
-
-long leerSensorDrenador()
+int readRainSensor()
 {
-  return digitalRead(PIN_SENSOR_DRENADOR);
+  return digitalRead(PIN_RAIN_SENSOR);
 }
-//----------------------------------------------
 
-//----------------------------------------------
-void apagar_leds( )
+long readDrainageSensor()
 {
-  digitalWrite(PIN_LED_VERDE, false);
-  digitalWrite(PIN_LED_AZUL , false);
-  digitalWrite(PIN_LED_NARANJA, false);
-  digitalWrite(PIN_LED_AMARILLO, false);
-
+  return digitalRead(PIN_DRAINAGE_SENSOR);
 }
-//----------------------------------------------
 
-//----------------------------------------------
-void actualizar_indicador_led_azul( )
+
+// -------------------- Leds functions --------------------
+void turnLedsOff()
 {
-  digitalWrite(PIN_LED_VERDE, false);
-  digitalWrite(PIN_LED_AZUL , true);
-  digitalWrite(PIN_LED_NARANJA , false);
-  digitalWrite(PIN_LED_AMARILLO, false);
+  digitalWrite(PIN_GREEN_LED, false);
+  digitalWrite(PIN_BLUE_LED , false);
+  digitalWrite(PIN_ORANGE_LED, false);
+  digitalWrite(PIN_YELLOW_LED, false);
 }
-//----------------------------------------------
 
-//----------------------------------------------
-void actualizar_indicador_led_verde( )
+void updateBlueLed()
 {
-  digitalWrite(PIN_LED_VERDE, true);
-  digitalWrite(PIN_LED_AZUL , false);
-  digitalWrite(PIN_LED_NARANJA , false);
-  digitalWrite(PIN_LED_AMARILLO, false);
-
+  digitalWrite(PIN_GREEN_LED, false);
+  digitalWrite(PIN_BLUE_LED , true);
+  digitalWrite(PIN_ORANGE_LED , false);
+  digitalWrite(PIN_YELLOW_LED, false);
 }
 
-void actualizar_indicador_led_naranja( )
+void updateGreenLed()
 {
-  digitalWrite(PIN_LED_AZUL, false);
-  digitalWrite(PIN_LED_NARANJA , true);
-  digitalWrite(PIN_LED_VERDE , false);
-  digitalWrite(PIN_LED_AMARILLO, false);
-
+  digitalWrite(PIN_GREEN_LED, true);
+  digitalWrite(PIN_BLUE_LED , false);
+  digitalWrite(PIN_ORANGE_LED , false);
+  digitalWrite(PIN_YELLOW_LED, false);
 }
 
-void actualizar_indicador_led_amarillo( )
+void updateOrangeLed()
 {
-  digitalWrite(PIN_LED_AMARILLO, true);
-  digitalWrite(PIN_LED_NARANJA , false);
-  digitalWrite(PIN_LED_VERDE , false);
-  digitalWrite(PIN_LED_AZUL , false);
+  digitalWrite(PIN_BLUE_LED, false);
+  digitalWrite(PIN_ORANGE_LED , true);
+  digitalWrite(PIN_GREEN_LED , false);
+  digitalWrite(PIN_YELLOW_LED, false);
 }
 
-void set_door(int angle){
-  servo.write(angle);
-}
-//----------------------------------------------
-
-// ---------------------------------------------
-bool verificarEstadoSensorHumedad()
+void updateYellowLed()
 {
-  sensores[SENSOR_HUMEDAD].valor_actual = leerSensorHumedad();
+  digitalWrite(PIN_YELLOW_LED, true);
+  digitalWrite(PIN_ORANGE_LED , false);
+  digitalWrite(PIN_GREEN_LED , false);
+  digitalWrite(PIN_BLUE_LED , false);
+}
+
+// -------------------- Tank door functions --------------------
+void setTankDoor(int angle){
+  tankDoorServo.write(angle);
+}
+
+
+// -------------------- Sensor checking functions --------------------
+bool checkHumiditySensorState()
+{
+  sensors[SENSOR_HUMIDITY].currentValue = readHumiditySensor();
   
-  int valor_actual = sensores[SENSOR_HUMEDAD].valor_actual;
-  int valor_previo = sensores[SENSOR_HUMEDAD].valor_previo;
+  int currentValue = sensors[SENSOR_HUMIDITY].currentValue;
+  int prevValue = sensors[SENSOR_HUMIDITY].prevValue;
   
-  if( valor_actual != valor_previo )
+  if (currentValue != prevValue)
   {
-    sensores[SENSOR_HUMEDAD].valor_previo = valor_actual;
+    sensors[SENSOR_HUMIDITY].prevValue = currentValue;
     
-    if( valor_actual < UMBRAL_HUMEDAD_BAJA )
+    if (currentValue < THRESHOLD_LOW_HUMIDITY)
     {
-      new_event = EV_LOW_MOISTURE;
+      new_event = EV_LOW_HUMIDITY;
     }
-    else if( valor_actual >= UMBRAL_HUMEDAD_BAJA && valor_actual < UMBRAL_HUMEDAD_MEDIA )
+    else if (currentValue >= THRESHOLD_LOW_HUMIDITY && currentValue < THRESHOLD_MEDIUM_HUMIDITY)
     {
-      new_event = EV_MEDIUM_MOISTURE;
+      new_event = EV_MEDIUM_HUMIDITY;
     }
-    else if( valor_actual >= UMBRAL_HUMEDAD_ALTA )
+    else if (currentValue >= THRESHOLD_HIGH_HUMIDITY)
     {
-      new_event = EV_HIGH_MOISTURE;
+      new_event = EV_HIGH_HUMIDITY;
     }
     
     return true;
@@ -322,38 +298,44 @@ bool verificarEstadoSensorHumedad()
   return false;
 }
 
+bool checkRainSensorState()
+{
+  sensors[SENSOR_RAIN].currentValue = readRainSensor();
 
-bool verificarSensorLluvia(){
-  sensores[SENSOR_LLUVIA].valor_actual = leerSensorLluvia();
+  int currentValue = sensors[SENSOR_RAIN].currentValue;
+  int prevValue = sensors[SENSOR_RAIN].prevValue;
 
-  int valor_actual = sensores[SENSOR_LLUVIA].valor_actual;
-  int valor_previo = sensores[SENSOR_LLUVIA].valor_previo;
+  if (currentValue != prevValue)
+  {
+    sensors[SENSOR_RAIN].prevValue = currentValue;
 
-  if(valor_actual != valor_previo){
-    sensores[SENSOR_LLUVIA].valor_previo = valor_actual;
-
-    if(valor_actual == RAIN_TRUE){
+    if (currentValue == RAIN_SENSOR_HIGH)
+    {
       new_event = EV_RAINING;
-    } else{
+    } 
+    else
+    {
       new_event = EV_NOT_RAINING; 
-    }    
+    }
+
     return true;
   }
+
   return false;
 }
 
-bool verificarEstadoSensorLuz()
+bool checkLightSensorState()
 {
-  sensores[SENSOR_LUZ].valor_actual = leerSensorLuz();
+  sensors[SENSOR_LIGHT].currentValue = readLightSensor();
   
-  int valor_actual = sensores[SENSOR_LUZ].valor_actual;
-  int valor_previo = sensores[SENSOR_LUZ].valor_previo;
+  int currentValue = sensors[SENSOR_LIGHT].currentValue;
+  int prevValue = sensors[SENSOR_LIGHT].prevValue;
   
-  if( valor_actual != valor_previo )
+  if (currentValue != prevValue)
   {
-    sensores[SENSOR_LUZ].valor_previo = valor_actual;
+    sensors[SENSOR_LIGHT].prevValue = currentValue;
     
-    if( valor_actual <= UMBRAL_LUZ_BAJA )
+    if (currentValue <= THRESHOLD_LOW_LIGHT)
     {
       new_event = EV_NIGHTFALL;
     }
@@ -368,30 +350,30 @@ bool verificarEstadoSensorLuz()
   return false;
 }
 
-bool verificarEstadoSensorNivelAgua()
+bool checkWaterLevelSensorState()
 {
-  sensores[SENSOR_NIVEL_AGUA].valor_actual = leerSensorNivelAgua();
+  sensors[SENSOR_WATER_LEVEL].currentValue = readWaterLevelSensor();
   
-  int valor_actual = sensores[SENSOR_NIVEL_AGUA].valor_actual;
-  int valor_previo = sensores[SENSOR_NIVEL_AGUA].valor_previo;
+  int currentValue = sensors[SENSOR_WATER_LEVEL].currentValue;
+  int prevValue = sensors[SENSOR_WATER_LEVEL].prevValue;
   
-  if( valor_actual != valor_previo )
+  if (currentValue != prevValue)
   {
-    sensores[SENSOR_NIVEL_AGUA].valor_previo = valor_actual;
+    sensors[SENSOR_WATER_LEVEL].prevValue = currentValue;
     
-    if(valor_actual <= UMBRAL_SIN_AGUA) 
+    if (currentValue <= THRESHOLD_NO_WATER) 
     {
       new_event = EV_NO_WATER;
     }
-    else if( valor_actual > UMBRAL_SIN_AGUA && valor_actual <= UMBRAL_AGUA_BAJA )
+    else if (currentValue > THRESHOLD_NO_WATER && currentValue <= THRESHOLD_LOW_WATER)
     {
       new_event = EV_LOW_WATER;
     }
-    else if( (valor_actual > UMBRAL_AGUA_BAJA) && (valor_actual < UMBRAL_AGUA_ALTA) )
+    else if ((currentValue > THRESHOLD_LOW_WATER) && (currentValue < THRESHOLD_HIGH_WATER))
     {
       new_event = EV_MEDIUM_WATER;
     }
-    else if( valor_actual >= UMBRAL_AGUA_ALTA )
+    else if (currentValue >= THRESHOLD_HIGH_WATER)
     {
       new_event = EV_HIGH_WATER;
     }
@@ -402,244 +384,227 @@ bool verificarEstadoSensorNivelAgua()
   return false;
 }
 
-bool verificarEstadoSensorDrenador()
+bool checkDrainageSensorState()
 {
-  sensores[SENSOR_DRENADOR].valor_actual = leerSensorDrenador();
+  sensors[SENSOR_DRAINAGE].currentValue = readDrainageSensor();
   
-  int valor_actual = sensores[SENSOR_DRENADOR].valor_actual;
-  int valor_previo = sensores[SENSOR_DRENADOR].valor_previo;
+  int currentValue = sensors[SENSOR_DRAINAGE].currentValue;
+  int prevValue = sensors[SENSOR_DRAINAGE].prevValue;
   
-  if(valor_actual != valor_previo){
-    sensores[SENSOR_DRENADOR].valor_previo = valor_actual;
+  if (currentValue != prevValue)
+  {
+    sensors[SENSOR_DRAINAGE].prevValue = currentValue;
 
-    if(valor_actual == DRAINAGE_TRUE){
+    if (currentValue == DRAINAGE_SENSOR_HIGH)
+    {
       new_event = EV_DRAINAGE;
     } 
-    else {
+    else 
+    {
       new_event = EV_STOP_DRAINAGE; 
     }    
+
     return true;
   }
+
   return false;
 }
-//----------------------------------------------
 
-//----------------------------------------------
-void get_new_event( )
+void checkAllSensors()
+{
+  return (checkHumiditySensorState() == true) || (checkLightSensorState() == true) || (checkWaterLevelSensorState() == true) || (checkRainSensorState() == true) || (checkDrainageSensorState() == true);
+}
+
+
+// -------------------- New event functions --------------------
+void getNewEvent()
 {
   long ct = millis();
-  int  diferencia = (ct - lct);
-  timeout = (diferencia > UMBRAL_DIFERENCIA_TIMEOUT)? (true):(false);
+  int  difference = (ct - lct);
+  timeout = (difference > THRESHOLD_TIMEOUT)? (true):(false);
 
-  if( timeout )
+  if (timeout)
   {
-    // Doy acuse de la recepcion del timeout
     timeout = false;
     lct     = ct;
     
-    if( (verificarEstadoSensorHumedad() == true) || (verificarEstadoSensorLuz() == true) || (verificarEstadoSensorNivelAgua() == true) || (verificarSensorLluvia() == true) || (verificarEstadoSensorDrenador() == true))
+    if (checkAllSensors())
     {
       return;
     }
   }
   
-  // Genero evento dummy ....
+  // Dummy event
   new_event = EV_CONT;
 }
-//----------------------------------------------
 
-void initConfig()
-{
-  DebugPrintEstado(states_s[current_state], events_s[new_event]);
-  apagar_leds();
-  current_state = ST_IDLE;
-}
-
+// -------------------- Error & void functions --------------------
 void error()
 {
+  // print error
 }
 
 void none()
 {
 }
 
-// IDLE
-//----------------------------------------------
-void low_sunlight()
+// -------------------- State change functions --------------------
+void lowSunlight()
 {
-  actualizar_indicador_led_azul();
-  current_state = ST_LOW_LIGHT;
+  updateBlueLed();
+  currentState = ST_LOW_LIGHT;
 }
 
-void high_sunlight()
+void highSunlight()
 {
-  actualizar_indicador_led_azul();
-  digitalWrite(PIN_BOMBA_AGUA, LOW);
-  current_state = ST_IDLE;
+  updateBlueLed();
+  digitalWrite(PIN_WATER_PUMP, LOW);
+  currentState = ST_IDLE;
 }
 
-void low_moisture() 
+void lowHumidity() 
 {
-  actualizar_indicador_led_azul();
-  current_state = ST_LOW_HUMIDITY;
+  updateBlueLed();
+  currentState = ST_LOW_HUMIDITY;
 }
 
-void medium_moisture() 
+void mediumHumidity() 
 {
-  actualizar_indicador_led_azul();
-  current_state = ST_IDLE;
+  updateBlueLed();
+  currentState = ST_IDLE;
 }
 
-void high_moisture() 
+void highHumidity() 
 {
-  actualizar_indicador_led_azul();
-  digitalWrite(PIN_BOMBA_AGUA, LOW);
-  current_state = ST_IDLE;
+  updateBlueLed();
+  digitalWrite(PIN_WATER_PUMP, LOW);
+  currentState = ST_IDLE;
 }
 
-void low_water()
+void lowWater()
 {
-  actualizar_indicador_led_azul();
-  digitalWrite(PIN_BOMBA_AGUA, LOW);
+  updateBlueLed();
+  digitalWrite(PIN_WATER_PUMP, LOW);
   moveWater = false;
-  current_state = ST_IDLE;
+  currentState = ST_IDLE;
 }
 
-void medium_water()
+void mediumWater()
 {
-  actualizar_indicador_led_azul();
+  updateBlueLed();
   moveWater = true;
-  current_state = ST_IDLE;
+  currentState = ST_IDLE;
 }
 
-void high_water()
+void highWater()
 {
-  actualizar_indicador_led_verde();
+  updateGreenLed();
   moveWater = true;
-  current_state = ST_WATERING;
+  currentState = ST_WATERING;
 }
 
-void set_rain()
+void raining()
 {
-  actualizar_indicador_led_naranja();
-  digitalWrite(PIN_BOMBA_AGUA, LOW);
-  current_state = ST_RAINING;
+  updateOrangeLed();
+  digitalWrite(PIN_WATER_PUMP, LOW);
+  currentState = ST_RAINING;
 }
 
-void set_not_rain()
+void notRaining()
 {
-  actualizar_indicador_led_azul();
-  set_door(CLOSED_DOOR_ANGLE);
-  current_state = ST_IDLE;
+  updateBlueLed();
+  setTankDoor(CLOSED_TANK_DOOR_ANGLE);
+  currentState = ST_IDLE;
 }
 
-void open_door()
+void openTankDoor()
 {
-  set_door(OPEN_DOOR_ANGLE);
-  current_state = ST_DOOR_OPEN;
+  setTankDoor(OPENED_TANK_DOOR_ANGLE);
+  currentState = ST_DOOR_OPEN;
 }
 
-void close_door()
+void closeTankDoor()
 {
-  actualizar_indicador_led_naranja();
-  set_door(CLOSED_DOOR_ANGLE);
-  current_state = ST_RAINING;
+  updateOrangeLed();
+  setTankDoor(CLOSED_TANK_DOOR_ANGLE);
+  currentState = ST_RAINING;
 }
 
-void closeDoorRainStopped() 
+void closeTankDoorRainStopped() 
 {
-  actualizar_indicador_led_azul();
-  set_door(CLOSED_DOOR_ANGLE);
-  current_state = ST_IDLE;
+  updateBlueLed();
+  setTankDoor(CLOSED_TANK_DOOR_ANGLE);
+  currentState = ST_IDLE;
 }
 
-//----------------------------------------------
-
-
-//WATERING
-//----------------------------------------------
 void watering()
 {
-  actualizar_indicador_led_verde();
-  digitalWrite(PIN_BOMBA_AGUA, HIGH);
-  current_state = ST_WATERING;
+  updateGreenLed();
+  digitalWrite(PIN_WATER_PUMP, HIGH);
+  currentState = ST_WATERING;
 }
-//----------------------------------------------
 
-//DRAINING
-//----------------------------------------------
 void draining()
 {
-  actualizar_indicador_led_amarillo();
-  current_state = ST_DRAINING;
+  updateYellowLed();
+  currentState = ST_DRAINING;
 }
 
 void stopDraining()
 {
-  actualizar_indicador_led_azul();
-  current_state = ST_IDLE;
+  updateBlueLed();
+  currentState = ST_IDLE;
 }
-//----------------------------------------------
 
 void noWater()
 {
-  actualizar_indicador_led_azul();
-  digitalWrite(PIN_BOMBA_AGUA, LOW);
+  updateBlueLed();
+  digitalWrite(PIN_WATER_PUMP, LOW);
   moveWater = false;
-  current_state = ST_NO_WATER;
+  currentState = ST_NO_WATER;
 }
 
-//----------------------------------------------
-void maquinaEstadosRegadorAutomatico()
+// -------------------- State machine --------------------
+void automaticWateringStateMachine()
 {
-  get_new_event();
+  getNewEvent();
 
-  if( (new_event >= 0) && (new_event < MAX_EVENTS) && (current_state >= 0) && (current_state < MAX_STATES) )
+  if ((new_event >= 0) && (new_event < MAX_EVENTS) && (currentState >= 0) && (currentState < MAX_STATES))
   {
-    if( new_event != EV_CONT )
+    if (new_event != EV_CONT)
     {
-      DebugPrintEstado(states_s[current_state], events_s[new_event]);
+      printState(states_s[currentState], events_s[new_event]);
     }
     
-    state_table[current_state][new_event]();
+    stateTable[currentState][new_event]();
   }
   else
   {
-    DebugPrintEstado(states_s[ST_ERROR], events_s[EV_UNKNOWN]);
+    printState(states_s[ST_ERROR], events_s[EV_UNKNOWN]);
   }
   
-  // Consumo el evento...
-  new_event   = EV_CONT;
+  new_event = EV_CONT;
 }
-//----------------------------------------------
 
-
-// Funciones de arduino !. 
-//----------------------------------------------
-void setup()
-{
-  do_init();
-}
-//----------------------------------------------
-
+// -------------------- TIMER2 interruption handler --------------------
 int counterICQ = 0;
-
 ISR(TIMER2_OVF_vect)
 {
   counterICQ++;
   if(moveWater && counterICQ == howManyInterrupts) {
     counterICQ = 0;
-    Serial.println("CAMBIANDO DIRECCION DE SERVO");
     waterMovementServo.write(rotatingLeft ? 0 : 179);
     rotatingLeft = !rotatingLeft;
   }
 }
 
-//----------------------------------------------
+// -------------------- Arduino functions --------------------
+void setup()
+{
+  initialSetup();
+}
+
 void loop()
 {
-  //Serial.println(current_state);
-  Serial.println(moveWater);
-  maquinaEstadosRegadorAutomatico();
+  automaticWateringStateMachine();
 }
-//----------------------------------------------

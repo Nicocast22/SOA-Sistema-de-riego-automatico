@@ -1,0 +1,122 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.ecowater"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="28"
+8-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml
+9        android:targetSdkVersion="32" />
+9-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml
+10
+11    <uses-permission android:name="android.permission.CAMERA" />
+11-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:5:5-65
+11-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:5:22-62
+12
+13    <uses-feature android:name="android.hardware.camera.flash" />
+13-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:6:5-66
+13-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:6:19-63
+14
+15    <permission
+15-->[androidx.core:core:1.9.0] /Users/santi/.gradle/caches/transforms-3/9811bf6e0ea8002748e1a5d1e9eb40bd/transformed/core-1.9.0/AndroidManifest.xml:22:5-24:47
+16        android:name="com.ecowater.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+16-->[androidx.core:core:1.9.0] /Users/santi/.gradle/caches/transforms-3/9811bf6e0ea8002748e1a5d1e9eb40bd/transformed/core-1.9.0/AndroidManifest.xml:23:9-81
+17        android:protectionLevel="signature" />
+17-->[androidx.core:core:1.9.0] /Users/santi/.gradle/caches/transforms-3/9811bf6e0ea8002748e1a5d1e9eb40bd/transformed/core-1.9.0/AndroidManifest.xml:24:9-44
+18
+19    <uses-permission android:name="com.ecowater.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+19-->[androidx.core:core:1.9.0] /Users/santi/.gradle/caches/transforms-3/9811bf6e0ea8002748e1a5d1e9eb40bd/transformed/core-1.9.0/AndroidManifest.xml:26:5-97
+19-->[androidx.core:core:1.9.0] /Users/santi/.gradle/caches/transforms-3/9811bf6e0ea8002748e1a5d1e9eb40bd/transformed/core-1.9.0/AndroidManifest.xml:26:22-94
+20
+21    <application
+21-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:8:5-40:19
+22        android:allowBackup="true"
+22-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:9:9-35
+23        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+23-->[androidx.core:core:1.9.0] /Users/santi/.gradle/caches/transforms-3/9811bf6e0ea8002748e1a5d1e9eb40bd/transformed/core-1.9.0/AndroidManifest.xml:28:18-86
+24        android:dataExtractionRules="@xml/data_extraction_rules"
+24-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:10:9-65
+25        android:debuggable="true"
+26        android:extractNativeLibs="false"
+27        android:fullBackupContent="@xml/backup_rules"
+27-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:11:9-54
+28        android:icon="@mipmap/ic_launcher"
+28-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:12:9-43
+29        android:label="@string/app_name"
+29-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:13:9-41
+30        android:roundIcon="@mipmap/ic_launcher_round"
+30-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:14:9-54
+31        android:supportsRtl="true"
+31-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:15:9-35
+32        android:testOnly="true"
+33        android:theme="@style/Theme.EcoWater" >
+33-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:16:9-46
+34        <activity
+34-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:18:9-26:20
+35            android:name="com.ecowater.SensorsTest"
+35-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:19:13-40
+36            android:exported="false"
+36-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:20:13-37
+37            android:parentActivityName="com.ecowater.MainActivity"
+37-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:21:13-55
+38            android:screenOrientation="portrait" >
+38-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:22:13-49
+39            <meta-data
+39-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:23:13-25:36
+40                android:name="android.app.lib_name"
+40-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:24:17-52
+41                android:value="" />
+41-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:25:17-33
+42        </activity>
+43        <activity
+43-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:27:9-39:20
+44            android:name="com.ecowater.MainActivity"
+44-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:28:13-41
+45            android:exported="true"
+45-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:29:13-36
+46            android:screenOrientation="portrait" >
+46-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:30:13-49
+47            <intent-filter>
+47-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:31:13-34:29
+48                <action android:name="android.intent.action.MAIN" />
+48-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:32:17-69
+48-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:32:25-66
+49
+50                <category android:name="android.intent.category.LAUNCHER" />
+50-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:33:17-77
+50-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:33:27-74
+51            </intent-filter>
+52
+53            <meta-data
+53-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:23:13-25:36
+54                android:name="android.app.lib_name"
+54-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:24:17-52
+55                android:value="" />
+55-->/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/src/main/AndroidManifest.xml:25:17-33
+56        </activity>
+57
+58        <provider
+58-->[androidx.emoji2:emoji2:1.2.0] /Users/santi/.gradle/caches/transforms-3/c03fa7bc00a04a375204b573f0966d9f/transformed/emoji2-1.2.0/AndroidManifest.xml:24:9-32:20
+59            android:name="androidx.startup.InitializationProvider"
+59-->[androidx.emoji2:emoji2:1.2.0] /Users/santi/.gradle/caches/transforms-3/c03fa7bc00a04a375204b573f0966d9f/transformed/emoji2-1.2.0/AndroidManifest.xml:25:13-67
+60            android:authorities="com.ecowater.androidx-startup"
+60-->[androidx.emoji2:emoji2:1.2.0] /Users/santi/.gradle/caches/transforms-3/c03fa7bc00a04a375204b573f0966d9f/transformed/emoji2-1.2.0/AndroidManifest.xml:26:13-68
+61            android:exported="false" >
+61-->[androidx.emoji2:emoji2:1.2.0] /Users/santi/.gradle/caches/transforms-3/c03fa7bc00a04a375204b573f0966d9f/transformed/emoji2-1.2.0/AndroidManifest.xml:27:13-37
+62            <meta-data
+62-->[androidx.emoji2:emoji2:1.2.0] /Users/santi/.gradle/caches/transforms-3/c03fa7bc00a04a375204b573f0966d9f/transformed/emoji2-1.2.0/AndroidManifest.xml:29:13-31:52
+63                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+63-->[androidx.emoji2:emoji2:1.2.0] /Users/santi/.gradle/caches/transforms-3/c03fa7bc00a04a375204b573f0966d9f/transformed/emoji2-1.2.0/AndroidManifest.xml:30:17-75
+64                android:value="androidx.startup" />
+64-->[androidx.emoji2:emoji2:1.2.0] /Users/santi/.gradle/caches/transforms-3/c03fa7bc00a04a375204b573f0966d9f/transformed/emoji2-1.2.0/AndroidManifest.xml:31:17-49
+65            <meta-data
+65-->[androidx.lifecycle:lifecycle-process:2.4.1] /Users/santi/.gradle/caches/transforms-3/0ce9e5f033589fdf0ab757f82f7808ec/transformed/lifecycle-process-2.4.1/AndroidManifest.xml:31:13-33:52
+66                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+66-->[androidx.lifecycle:lifecycle-process:2.4.1] /Users/santi/.gradle/caches/transforms-3/0ce9e5f033589fdf0ab757f82f7808ec/transformed/lifecycle-process-2.4.1/AndroidManifest.xml:32:17-78
+67                android:value="androidx.startup" />
+67-->[androidx.lifecycle:lifecycle-process:2.4.1] /Users/santi/.gradle/caches/transforms-3/0ce9e5f033589fdf0ab757f82f7808ec/transformed/lifecycle-process-2.4.1/AndroidManifest.xml:33:17-49
+68        </provider>
+69    </application>
+70
+71</manifest>

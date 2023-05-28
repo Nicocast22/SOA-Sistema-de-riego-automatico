@@ -6,21 +6,15 @@
         <type value="RUNNING_DEVICE_TARGET" />
         <deviceKey>
           <Key>
-<<<<<<< HEAD
             <type value="VIRTUAL_DEVICE_PATH" />
             <value value="$USER_HOME$/.android/avd/Pixel6.avd" />
-=======
             <type value="SERIAL_NUMBER" />
             <value value="4ea361d2" />
->>>>>>> 505d63e (feat: sensors activity)
           </Key>
         </deviceKey>
       </Target>
     </runningDeviceTargetSelectedWithDropDown>
-<<<<<<< HEAD
     <timeTargetWasSelectedWithDropDown value="2023-05-27T22:22:12.755213Z" />
-=======
     <timeTargetWasSelectedWithDropDown value="2023-05-28T22:49:55.597489Z" />
->>>>>>> 505d63e (feat: sensors activity)
   </component>
 </project>

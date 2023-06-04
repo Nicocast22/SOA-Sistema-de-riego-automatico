@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">EcoWater</string>
+    <string name="app_logo_title">EcoWater</string>
+    <string name="app_logo_subtitle">Making your plants happier!</string>
+    <string name="bluetooth">Bluetooth</string>
+    <string name="sensors">Sensores</string>
+    <string name="arduino_interaction">Interaccion Arduino</string>
+    <string name="sensors_instructions">Tape el sensor de luz para prender el flash de su dispositivo</string>
+    <string name="light_sensor_value">Valor del sensor de luz</string>
+    <string name="flash_state">Estado del flash</string>
+    <string name="on">on</string>
+    <string name="off">off</string>
+    <string name="light_sensor_tooltip">El flash también se puede encender por falta de luz en el ambiente</string>
 </resources>

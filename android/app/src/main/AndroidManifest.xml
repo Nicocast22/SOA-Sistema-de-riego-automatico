@@ -16,7 +16,7 @@
         android:theme="@style/Theme.EcoWater"
         tools:targetApi="31" >
         <activity
-            android:name=".SensorsTest"
+            android:name=".Sensors"
             android:exported="false"
             android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait">

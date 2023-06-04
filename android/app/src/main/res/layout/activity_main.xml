@@ -4,80 +4,95 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/ic_wave"
     tools:context=".MainActivity">
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/bluetoothBtn"
         android:layout_width="308dp"
         android:layout_height="68dp"
         android:layout_marginStart="51dp"
-        android:layout_marginTop="200dp"
+        android:layout_marginTop="320dp"
         android:layout_marginEnd="52dp"
-        android:layout_marginBottom="1dp"
-        android:backgroundTint="#666969"
-        android:text="Bluetooth"
-        app:layout_constraintBottom_toTopOf="@+id/button2"
+        android:layout_marginBottom="10dp"
+        android:backgroundTint="@color/primaryDarker"
+        android:text="@string/bluetooth"
+        app:layout_constraintBottom_toTopOf="@+id/arduinoBtn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        app:layout_constraintTop_toBottomOf="@+id/appNameLogo" />
 
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/arduinoBtn"
         android:layout_width="308dp"
         android:layout_height="68dp"
         android:layout_marginStart="51dp"
-        android:layout_marginTop="10dp"
         android:layout_marginEnd="52dp"
-        android:layout_marginBottom="11dp"
-        android:backgroundTint="#666969"
-        android:text="Interacción Arduino"
-        app:layout_constraintBottom_toTopOf="@+id/button3"
+        android:layout_marginBottom="10dp"
+        android:backgroundTint="@color/primaryDarker"
+        android:text="@string/arduino_interaction"
+        app:layout_constraintBottom_toTopOf="@+id/sensorsBtn"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/sensorsBtn"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button" />
+        app:layout_constraintTop_toBottomOf="@+id/bluetoothBtn" />
 
     <Button
-        android:id="@+id/button3"
+        android:id="@+id/sensorsBtn"
         android:layout_width="308dp"
         android:layout_height="68dp"
         android:layout_marginStart="51dp"
-        android:layout_marginTop="6dp"
         android:layout_marginEnd="52dp"
-        android:layout_marginBottom="82dp"
-        android:backgroundTint="#666969"
-        android:text="Prueba sensores"
+        android:layout_marginBottom="40dp"
+        android:backgroundTint="@color/primaryDarker"
+        android:text="@string/sensors"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button2" />
+        app:layout_constraintTop_toBottomOf="@+id/arduinoBtn" />
 
     <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="276dp"
-        android:layout_height="122dp"
+        android:id="@+id/mainLogo"
+        android:layout_width="277dp"
+        android:layout_height="95dp"
         android:layout_marginStart="62dp"
-        android:layout_marginTop="37dp"
+        android:layout_marginTop="5dp"
         android:layout_marginEnd="63dp"
-        app:layout_constraintBottom_toTopOf="@+id/textView"
+        app:layout_constraintBottom_toTopOf="@+id/appNameLogo"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
         app:srcCompat="@drawable/applogo" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/appNameLogo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="123dp"
         android:layout_marginEnd="124dp"
-        android:text="EcoWater"
-        android:textColor="#666969"
-        android:textSize="34sp"
-        app:layout_constraintBottom_toTopOf="@+id/button"
+        android:text="@string/app_logo_title"
+        android:textColor="@color/white"
+        android:textSize="48sp"
+        app:layout_constraintBottom_toTopOf="@+id/bluetoothBtn"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+        app:layout_constraintTop_toBottomOf="@+id/mainLogo" />
+
+    <TextView
+        android:id="@+id/logoSubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/app_logo_subtitle"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@+id/bluetoothBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/appNameLogo"
+        app:layout_constraintVertical_bias="0.0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -32,7 +32,7 @@
         android:testOnly="true"
         android:theme="@style/Theme.EcoWater" >
         <activity
-            android:name="com.ecowater.SensorsTest"
+            android:name="com.ecowater.Sensors"
             android:exported="false"
             android:parentActivityName="com.ecowater.MainActivity"
             android:screenOrientation="portrait" >

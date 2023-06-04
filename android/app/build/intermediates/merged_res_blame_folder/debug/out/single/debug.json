@@ -8,12 +8,12 @@
         "source": "/Users/santi/.gradle/daemon/7.4/com.ecowater.app-main-31:/mipmap-xhdpi/ic_launcher_round.webp"
     },
     {
-        "merged": "/Users/santi/.gradle/daemon/7.4/com.ecowater.app-merged_res-29:/layout_activity_sensors_test.xml.flat",
-        "source": "/Users/santi/.gradle/daemon/7.4/com.ecowater.app-main-31:/layout/activity_sensors_test.xml"
-    },
-    {
         "merged": "/Users/santi/.gradle/daemon/7.4/com.ecowater.app-merged_res-29:/xml_backup_rules.xml.flat",
         "source": "/Users/santi/.gradle/daemon/7.4/com.ecowater.app-main-31:/xml/backup_rules.xml"
+    },
+    {
+        "merged": "/Users/santi/.gradle/daemon/7.4/com.ecowater.app-merged_res-29:/layout_activity_sensors.xml.flat",
+        "source": "/Users/santi/.gradle/daemon/7.4/com.ecowater.app-main-31:/layout/activity_sensors.xml"
     },
     {
         "merged": "/Users/santi/.gradle/daemon/7.4/com.ecowater.app-merged_res-29:/mipmap-mdpi_ic_launcher_round.webp.flat",
@@ -72,8 +72,12 @@
         "source": "/Users/santi/.gradle/daemon/7.4/com.ecowater.app-main-31:/mipmap-xxxhdpi/ic_launcher.webp"
     },
     {
-        "merged": "com.ecowater.app-merged_res-29:/layout_activity_sensors_test.xml.flat",
-        "source": "com.ecowater.app-main-31:/layout/activity_sensors_test.xml"
+        "merged": "/Users/santi/.gradle/daemon/7.4/com.ecowater.app-merged_res-29:/drawable_ic_wave.xml.flat",
+        "source": "/Users/santi/.gradle/daemon/7.4/com.ecowater.app-main-31:/drawable/ic_wave.xml"
+    },
+    {
+        "merged": "com.ecowater.app-merged_res-29:/layout_activity_sensors.xml.flat",
+        "source": "com.ecowater.app-main-31:/layout/activity_sensors.xml"
     },
     {
         "merged": "/Users/santi/.gradle/daemon/7.4/com.ecowater.app-merged_res-29:/drawable_ic_launcher_background.xml.flat",

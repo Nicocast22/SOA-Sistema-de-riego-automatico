@@ -1,4 +1,4 @@
-#Sun May 28 20:43:54 ART 2023
+#Sun Jun 04 16:13:06 ART 2023
 base.2=/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/build/intermediates/dex/debug/mergeProjectDexDebug/12/classes.dex
 path.2=12/classes.dex
 base.1=/Users/santi/Workspace/SOA-Sistema-de-riego-automatico/android/app/build/intermediates/dex/debug/mergeProjectDexDebug/0/classes.dex

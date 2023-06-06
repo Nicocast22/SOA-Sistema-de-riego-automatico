@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Sensors"
+    android:background="#EDEDED">
+
+    <ImageView
+        android:id="@+id/flashImage"
+        android:layout_width="194dp"
+        android:layout_height="259dp"
+        android:layout_marginTop="16dp"
+        android:contentDescription="TODO"
+        android:src="@drawable/flash"
+        app:layout_constraintBottom_toTopOf="@+id/indicationText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/indicationText"
+        android:layout_width="295dp"
+        android:layout_height="99dp"
+        android:layout_marginBottom="140dp"
+        android:background="@color/primary"
+        android:gravity="center"
+        android:paddingHorizontal="20px"
+        android:paddingVertical="20px"
+        android:text="@string/sensors_instructions"
+        android:textAlignment="center"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:tooltipText="@string/light_sensor_tooltip"
+        app:layout_constraintBottom_toTopOf="@+id/flashStatusText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/flashImage" />
+
+    <TextView
+        android:id="@+id/flashStatusText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="42dp"
+        android:layout_marginEnd="226dp"
+        android:text="@string/flash_state"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@+id/flashOnText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/lightSensorValueText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="42dp"
+        android:layout_marginTop="29dp"
+        android:layout_marginEnd="167dp"
+        android:layout_marginBottom="9dp"
+        android:text="@string/light_sensor_value"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@+id/lightSensorValue"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/indicationText" />
+
+    <TextView
+        android:id="@+id/lightSensorValue"
+        android:layout_width="87dp"
+        android:layout_height="60dp"
+        android:layout_marginBottom="35dp"
+        android:background="?colorPrimary"
+        android:gravity="center"
+        android:text="20"
+        android:textAlignment="center"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toTopOf="@+id/flashStatusText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lightSensorValueText"
+        tools:ignore="TextContrastCheck" />
+
+    <TextView
+        android:id="@+id/flashOnText"
+        android:layout_width="324dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="42dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="45dp"
+        android:background="@color/semanticSuccess"
+        android:capitalize="none"
+        android:gravity="center"
+        android:text="@string/on"
+        android:textAlignment="center"
+        android:textAllCaps="true"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/flashStatusText"
+        tools:ignore="TextContrastCheck" />
+
+    <TextView
+        android:id="@+id/flashOffText"
+        android:layout_width="324dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="42dp"
+        android:layout_marginTop="11dp"
+        android:layout_marginEnd="45dp"
+        android:layout_marginBottom="16dp"
+        android:background="@color/semanticError"
+        android:gravity="center"
+        android:text="@string/off"
+        android:textAlignment="center"
+        android:textAllCaps="true"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/flashOnText" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

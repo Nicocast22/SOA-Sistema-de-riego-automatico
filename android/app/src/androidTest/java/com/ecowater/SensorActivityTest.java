@@ -39,8 +39,8 @@ public class SensorActivityTest {
     public void testShowSensorButton()
     {
         ActivityScenario<MainActivity> scenario = activityRule.getScenario();
-        onView(withId(R.id.button3)).perform(click());
+        onView(withId(R.id.sensorsBtn)).perform(click());
         assertThat((Intent) Iterables.getOnlyElement(Intents.getIntents())).hasComponentClass(
-                SensorsTest.class);
+                Sensors.class);
     }
 }

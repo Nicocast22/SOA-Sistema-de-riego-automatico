@@ -61,7 +61,7 @@
 #define PIN_RX_BLUETOOTH                                7
 #define PIN_RAIN_SENSOR                                 8
 #define PIN_WATER_MOVEMENT_SERVO                        9
-#define PIN_TANK_DOOR_SERVO                             10
+#define PIN_TANK_DOOR_SERVO                             11
 #define PIN_LIGHT_SENSOR                                13 
             
 
@@ -94,7 +94,7 @@ typedef void (*transition)();
 bool timeout;
 long lct;
 bool moveWater = false;
-int rotatingOffset = 10;
+int rotatingOffset = 45;
 Servo tankDoorServo;
 Servo waterMovementServo;
 Servo drainageValveServo;
@@ -471,7 +471,6 @@ void mediumWater()
 
 void highWater()
 {
-  Serial.println("AGUA ALTAAAAAAAAAAAAA");
   currentState = ST_WATERING;
 }
 
@@ -584,22 +583,14 @@ ISR(TIMER2_OVF_vect)
   }
 }
 
-
 // -------------------- Arduino functions --------------------
 void setup()
 {
   initialSetup();
 }
 
+
 void loop()
 {
   automaticWateringStateMachine();
-  //delay(1000);
-  Serial.println(currentState);
-  Serial.print("WATER ");
-  Serial.println(analogRead(A1));
-  Serial.print("HUMEDAD ");
-  Serial.println(analogRead(A0));
-  Serial.print("LUZ ");
-  Serial.println(digitalRead(13));
 }

@@ -471,7 +471,6 @@ void mediumWater()
 
 void highWater()
 {
-  Serial.println("AGUA ALTAAAAAAAAAAAAA");
   currentState = ST_WATERING;
 }
 
@@ -583,8 +582,6 @@ ISR(TIMER2_OVF_vect)
     }
   }
 }
-
-  int angle = 0;
 
 // -------------------- Arduino functions --------------------
 void setup()

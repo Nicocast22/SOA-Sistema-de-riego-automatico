@@ -11,4 +11,22 @@
     <string name="on">on</string>
     <string name="off">off</string>
     <string name="light_sensor_tooltip">El flash también se puede encender por falta de luz en el ambiente</string>
+    <string name="bt_status">Estado del bluetooth</string>
+    <string name="bt_actions">Acciones</string>
+    <string name="enable_bt">Activar bluetooth</string>
+    <string name="disable_bt">Desactivar bluetooth</string>
+    <string name="search_devices">Buscar dispositivos</string>
+    <string name="paired_devices">Dispositivos emparejados</string>
+    <string name="bt_enabled">Bluetooth activado</string>
+    <string name="bt_disabled">Bluetooth desactivado</string>
+    <string name="bt_not_available_on_device">Bluetooth no disponible en este dispositivo</string>
+    <string name="device_found">Dispositivo encontrado: </string>
+    <string name="bt_device_search_init">Buscando dispositivos</string>
+    <string name="bt_device_search_end">Búsqueda de dispositivos finalizada</string>
+    <string name="turning_bt_off">Apagando bluetooth</string>
+    <string name="turning_bt_on">Encendiendo bluetooth</string>
+    <string name="oops">Oops!</string>
+    <string name="flash_not_available_on_device">Flash no disponible en este dispositivo...</string>
+    <string name="flash_on">Flash ON</string>
+    <string name="flash_off">Flashh OFF</string>
 </resources>

@@ -12,5 +12,7 @@
     <color name="primaryLighter">#00DCD8</color>
     <color name="semanticSuccess">#32C84A</color>
     <color name="semanticError">#C83232</color>
+    <color name="disabledSuccess">#B1D0B6</color>
+    <color name="disabledError">#D1A3A3</color>
 
 </resources>

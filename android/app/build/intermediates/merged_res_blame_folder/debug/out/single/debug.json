@@ -24,12 +24,16 @@
         "source": "/Users/santi/.gradle/daemon/7.4/com.ecowater.app-main-31:/mipmap-hdpi/ic_launcher_round.webp"
     },
     {
-        "merged": "com.ecowater.app-merged_res-29:/layout_activity_bluetooth_devices_found.xml.flat",
-        "source": "com.ecowater.app-main-31:/layout/activity_bluetooth_devices_found.xml"
-    },
-    {
         "merged": "/Users/santi/.gradle/daemon/7.4/com.ecowater.app-merged_res-29:/xml_data_extraction_rules.xml.flat",
         "source": "/Users/santi/.gradle/daemon/7.4/com.ecowater.app-main-31:/xml/data_extraction_rules.xml"
+    },
+    {
+        "merged": "/Users/santi/.gradle/daemon/7.4/com.ecowater.app-merged_res-29:/layout_bluetooth_device.xml.flat",
+        "source": "/Users/santi/.gradle/daemon/7.4/com.ecowater.app-main-31:/layout/bluetooth_device.xml"
+    },
+    {
+        "merged": "com.ecowater.app-merged_res-29:/layout_activity_bluetooth_devices.xml.flat",
+        "source": "com.ecowater.app-main-31:/layout/activity_bluetooth_devices.xml"
     },
     {
         "merged": "/Users/santi/.gradle/daemon/7.4/com.ecowater.app-merged_res-29:/drawable_bt.png.flat",
@@ -62,6 +66,10 @@
     {
         "merged": "/Users/santi/.gradle/daemon/7.4/com.ecowater.app-merged_res-29:/drawable_applogo.png.flat",
         "source": "/Users/santi/.gradle/daemon/7.4/com.ecowater.app-main-31:/drawable/applogo.png"
+    },
+    {
+        "merged": "/Users/santi/.gradle/daemon/7.4/com.ecowater.app-merged_res-29:/layout_activity_bluetooth_devices.xml.flat",
+        "source": "/Users/santi/.gradle/daemon/7.4/com.ecowater.app-main-31:/layout/activity_bluetooth_devices.xml"
     },
     {
         "merged": "/Users/santi/.gradle/daemon/7.4/com.ecowater.app-merged_res-29:/drawable_arduino.png.flat",

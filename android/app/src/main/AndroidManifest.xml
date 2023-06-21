@@ -34,7 +34,7 @@
         android:theme="@style/Theme.EcoWater"
         tools:targetApi="31">
         <activity
-            android:name=".BluetoothDevicesFound"
+            android:name=".BluetoothDevicesActivity"
             android:exported="false"
             android:parentActivityName=".BluetoothActivity"
             android:screenOrientation="portrait">

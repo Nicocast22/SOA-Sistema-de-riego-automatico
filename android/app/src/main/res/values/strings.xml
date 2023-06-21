@@ -28,5 +28,11 @@
     <string name="oops">Oops!</string>
     <string name="flash_not_available_on_device">Flash no disponible en este dispositivo...</string>
     <string name="flash_on">Flash ON</string>
-    <string name="flash_off">Flashh OFF</string>
+    <string name="flash_off">Flash OFF</string>
+    <string name="available_bt_devices">Dispositivos encontrados</string>
+    <string name="pair">Emparejar</string>
+    <string name="unpair">Desemparejar</string>
+    <string name="pairing">Emparejando dispositivo</string>
+    <string name="bt">Bluetooth</string>
+    <string name="bt_devices">Dispositivos bluetooth</string>
 </resources>

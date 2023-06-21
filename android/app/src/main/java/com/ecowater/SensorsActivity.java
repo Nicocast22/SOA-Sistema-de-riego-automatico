@@ -22,12 +22,15 @@ public class SensorsActivity extends AppCompatActivity implements SensorEventLis
 
     // Light sensor
     private final int LUX_THRESHOLD = 1;
+
     // Flashlight
     private final boolean FLASHLIGHT_ON = true;
     private final boolean FLASHLIGHT_OFF = false;
+
     // Sensor
     private SensorManager sensorManager;
     private Sensor mLight;
+
     // Camera
     private CameraManager cameraManager;
     private String cameraId;
@@ -38,10 +41,12 @@ public class SensorsActivity extends AppCompatActivity implements SensorEventLis
     private TextView offText;
     private TextView luxValueText;
 
+    // Lifecycle
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sensors);
+        setTitle(getString(R.string.sensors));
 
         onText = findViewById(R.id.flashOnText);
         offText = findViewById(R.id.flashOffText);
@@ -69,6 +74,7 @@ public class SensorsActivity extends AppCompatActivity implements SensorEventLis
         sensorsCleanUp();
     }
 
+    // Sensors
     @SuppressLint("SetTextI18n")
     @Override
     public void onSensorChanged(SensorEvent event) {
@@ -116,14 +122,6 @@ public class SensorsActivity extends AppCompatActivity implements SensorEventLis
         }
     }
 
-    public void showFlashError() {
-        AlertDialog alert = new AlertDialog.Builder(this).create();
-        alert.setTitle(getString(R.string.oops));
-        alert.setMessage(getString(R.string.flash_not_available_on_device));
-        alert.setButton(DialogInterface.BUTTON_POSITIVE, "OK", (dialog, which) -> finish());
-        alert.show();
-    }
-
     private void toggleFlashlight(boolean status) {
         try {
             cameraManager.setTorchMode(cameraId, status);
@@ -132,6 +130,14 @@ public class SensorsActivity extends AppCompatActivity implements SensorEventLis
         }
     }
 
+    private void sensorsCleanUp() {
+        if (isFlashlightOn) {
+            toggleFlashlight(FLASHLIGHT_OFF);
+        }
+        sensorManager.unregisterListener(this);
+    }
+
+    // Layout utils
     private void showToast(String text) {
         Toast.makeText(SensorsActivity.this, text, Toast.LENGTH_SHORT).show();
     }
@@ -146,10 +152,12 @@ public class SensorsActivity extends AppCompatActivity implements SensorEventLis
         }
     }
 
-    private void sensorsCleanUp() {
-        if (isFlashlightOn) {
-            toggleFlashlight(FLASHLIGHT_OFF);
-        }
-        sensorManager.unregisterListener(this);
+    public void showFlashError() {
+        AlertDialog alert = new AlertDialog.Builder(this).create();
+        alert.setTitle(getString(R.string.oops));
+        alert.setMessage(getString(R.string.flash_not_available_on_device));
+        alert.setButton(DialogInterface.BUTTON_POSITIVE, "OK", (dialog, which) -> finish());
+        alert.show();
     }
+
 }

@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
@@ -55,8 +54,8 @@ public class BluetoothActivity extends AppCompatActivity {
                     break;
 
                 case BluetoothAdapter.ACTION_DISCOVERY_STARTED:
-                    aDeviceList = new ArrayList<BluetoothDevice>();
                     progressBar.setVisibility(View.VISIBLE);
+                    aDeviceList = new ArrayList<BluetoothDevice>();
                     showToast(getString(R.string.bt_device_search_init));
                     getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                     break;
@@ -66,7 +65,7 @@ public class BluetoothActivity extends AppCompatActivity {
                     getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                     showToast(getString(R.string.bt_device_search_end));
 
-                    Intent newIntent = new Intent(BluetoothActivity.this, BluetoothDevicesFound.class);
+                    Intent newIntent = new Intent(BluetoothActivity.this, BluetoothDevicesActivity.class);
                     newIntent.putParcelableArrayListExtra("device.list", aDeviceList);
                     startActivity(newIntent);
                     break;
@@ -111,6 +110,7 @@ public class BluetoothActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth);
+        setTitle(getString(R.string.bluetooth));
 
         toggleBtBtn = (Button) findViewById(R.id.toggleBtBtn);
         searchDevicesBtBtn = (Button) findViewById(R.id.searchDevicesBtn);

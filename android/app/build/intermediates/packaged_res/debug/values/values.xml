@@ -18,10 +18,13 @@
     <string name="app_logo_title">EcoWater</string>
     <string name="app_name">EcoWater</string>
     <string name="arduino_interaction">Interaccion Arduino</string>
+    <string name="available_bt_devices">Dispositivos encontrados</string>
     <string name="bluetooth">Bluetooth</string>
+    <string name="bt">Bluetooth</string>
     <string name="bt_actions">Acciones</string>
     <string name="bt_device_search_end">Búsqueda de dispositivos finalizada</string>
     <string name="bt_device_search_init">Buscando dispositivos</string>
+    <string name="bt_devices">Dispositivos bluetooth</string>
     <string name="bt_disabled">Bluetooth desactivado</string>
     <string name="bt_enabled">Bluetooth activado</string>
     <string name="bt_not_available_on_device">Bluetooth no disponible en este dispositivo</string>
@@ -30,7 +33,7 @@
     <string name="disable_bt">Desactivar bluetooth</string>
     <string name="enable_bt">Activar bluetooth</string>
     <string name="flash_not_available_on_device">Flash no disponible en este dispositivo...</string>
-    <string name="flash_off">Flashh OFF</string>
+    <string name="flash_off">Flash OFF</string>
     <string name="flash_on">Flash ON</string>
     <string name="flash_state">Estado del flash</string>
     <string name="light_sensor_tooltip">El flash también se puede encender por falta de luz en el ambiente</string>
@@ -38,12 +41,15 @@
     <string name="off">off</string>
     <string name="on">on</string>
     <string name="oops">Oops!</string>
+    <string name="pair">Emparejar</string>
     <string name="paired_devices">Dispositivos emparejados</string>
+    <string name="pairing">Emparejando dispositivo</string>
     <string name="search_devices">Buscar dispositivos</string>
     <string name="sensors">Sensores</string>
     <string name="sensors_instructions">Tape el sensor de luz para prender el flash de su dispositivo</string>
     <string name="turning_bt_off">Apagando bluetooth</string>
     <string name="turning_bt_on">Encendiendo bluetooth</string>
+    <string name="unpair">Desemparejar</string>
     <style name="Theme.EcoWater" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         
         <item name="colorPrimary">@color/primary</item>

@@ -3123,7 +3123,6 @@ int id btActionsText 0x7f080065
 int id btOffText 0x7f080066
 int id btOnText 0x7f080067
 int id btStatusText 0x7f080068
-int id btn_pair 0x7f080069
 int id buttonPanel 0x7f08006a
 int id cache_measures 0x7f08006b
 int id callMeasure 0x7f08006c
@@ -3175,6 +3174,8 @@ int id design_menu_item_action_area 0x7f080099
 int id design_menu_item_action_area_stub 0x7f08009a
 int id design_menu_item_text 0x7f08009b
 int id design_navigation_view 0x7f08009c
+int id device_mac_address 0x7f080209
+int id device_name 0x7f08020a
 int id dialog_button 0x7f08009d
 int id dimensions 0x7f08009e
 int id direct 0x7f08009f
@@ -3360,6 +3361,7 @@ int id outline 0x7f080151
 int id outward 0x7f080152
 int id overshoot 0x7f080153
 int id packed 0x7f080154
+int id pairBtn 0x7f08020b
 int id parallax 0x7f080156
 int id parent 0x7f080157
 int id parentPanel 0x7f080158
@@ -3511,8 +3513,6 @@ int id transition_position 0x7f0801e9
 int id transition_scene_layoutid_cache 0x7f0801ea
 int id transition_transform 0x7f0801eb
 int id triangle 0x7f0801ec
-int id tv_address 0x7f0801ed
-int id tv_name 0x7f0801ee
 int id tv_status 0x7f0801ef
 int id unchecked 0x7f0801f0
 int id uniform 0x7f0801f1
@@ -3651,9 +3651,10 @@ int layout abc_search_view 0x7f0b0019
 int layout abc_select_dialog_material 0x7f0b001a
 int layout abc_tooltip 0x7f0b001b
 int layout activity_bluetooth 0x7f0b001c
-int layout activity_bluetooth_devices_found 0x7f0b001d
+int layout activity_bluetooth_devices 0x7f0b006e
 int layout activity_main 0x7f0b001e
 int layout activity_sensors 0x7f0b001f
+int layout bluetooth_device 0x7f0b006f
 int layout custom_dialog 0x7f0b0020
 int layout design_bottom_navigation_item 0x7f0b0021
 int layout design_bottom_sheet_dialog 0x7f0b0022
@@ -3670,7 +3671,6 @@ int layout design_navigation_menu 0x7f0b002c
 int layout design_navigation_menu_item 0x7f0b002d
 int layout design_text_input_end_icon 0x7f0b002e
 int layout design_text_input_start_icon 0x7f0b002f
-int layout list_item_layout 0x7f0b0030
 int layout m3_alert_dialog 0x7f0b0031
 int layout m3_alert_dialog_actions 0x7f0b0032
 int layout m3_alert_dialog_title 0x7f0b0033
@@ -3768,6 +3768,7 @@ int string app_logo_title 0x7f0f001d
 int string app_name 0x7f0f001e
 int string appbar_scrolling_view_behavior 0x7f0f001f
 int string arduino_interaction 0x7f0f0020
+int string available_bt_devices 0x7f0f00bc
 int string bluetooth 0x7f0f0021
 int string bottom_sheet_behavior 0x7f0f0022
 int string bottomsheet_action_collapse 0x7f0f0023
@@ -3775,9 +3776,11 @@ int string bottomsheet_action_expand 0x7f0f0024
 int string bottomsheet_action_expand_halfway 0x7f0f0025
 int string bottomsheet_drag_handle_clicked 0x7f0f0026
 int string bottomsheet_drag_handle_content_description 0x7f0f0027
+int string bt 0x7f0f00c0
 int string bt_actions 0x7f0f0028
 int string bt_device_search_end 0x7f0f00b0
 int string bt_device_search_init 0x7f0f00b1
+int string bt_devices 0x7f0f00c1
 int string bt_disabled 0x7f0f00b2
 int string bt_enabled 0x7f0f00b3
 int string bt_not_available_on_device 0x7f0f00b4
@@ -3905,7 +3908,9 @@ int string mtrl_timepicker_confirm 0x7f0f009d
 int string off 0x7f0f009e
 int string on 0x7f0f009f
 int string oops 0x7f0f00bb
+int string pair 0x7f0f00bd
 int string paired_devices 0x7f0f00a0
+int string pairing 0x7f0f00bf
 int string password_toggle_content_description 0x7f0f00a1
 int string path_password_eye 0x7f0f00a2
 int string path_password_eye_mask_strike_through 0x7f0f00a3
@@ -3923,6 +3928,7 @@ int string side_sheet_behavior 0x7f0f00ae
 int string status_bar_notification_info_overflow 0x7f0f00af
 int string turning_bt_off 0x7f0f00b6
 int string turning_bt_on 0x7f0f00b7
+int string unpair 0x7f0f00be
 int style AlertDialog_AppCompat 0x7f100000
 int style AlertDialog_AppCompat_Light 0x7f100001
 int style Animation_AppCompat_Dialog 0x7f100002

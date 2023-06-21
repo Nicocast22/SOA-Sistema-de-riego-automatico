@@ -49,7 +49,7 @@
         android:testOnly="true"
         android:theme="@style/Theme.EcoWater" >
         <activity
-            android:name="com.ecowater.BluetoothDevicesFound"
+            android:name="com.ecowater.BluetoothDevicesActivity"
             android:exported="false"
             android:parentActivityName="com.ecowater.BluetoothActivity"
             android:screenOrientation="portrait" >

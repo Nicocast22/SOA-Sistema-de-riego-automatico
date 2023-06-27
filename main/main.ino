@@ -19,8 +19,7 @@
 #define THRESHOLD_LOW_HUMIDITY                          1000
 #define THRESHOLD_HIGH_HUMIDITY                         400
 
-#define THRESHOLD_LOW_LIGHT                             200
-#define THRESHOLD_HIGH_LIGHT                            400
+#define LOW_LIGHT                                       1
  
 #define THRESHOLD_NO_WATER                              900
 #define THRESHOLD_LOW_WATER                             500
@@ -305,7 +304,7 @@ bool checkLightSensorState()
   {
     sensors[SENSOR_LIGHT].prevValue = currentValue;
     
-    if (currentValue == 1)
+    if (currentValue == LOW_LIGHT)
     {
       newEvent = EV_NIGHTFALL;
     }
@@ -373,13 +372,15 @@ bool checkBluetoothCommands()
       }else if(compareString(cmd,SENSORS_VALUE_LIGHT)){
         newEvent = EV_CONT;
         long value = readLightSensor();
-        sendBTInformation((String)value);
+        String info = "L@" + (String)value;
+        sendBTInformation(info);
         return true;
       }else if(compareString(cmd, SENSORS_VALUE_WATER_LEVEL)){
         newEvent = EV_CONT;
         Serial.println("Leyendo sensor agua");
         long value = readWaterLevelSensor();
-        sendBTInformation((String)value);
+        String info = "W@" + (String)value;
+        sendBTInformation(info);
         return true;
       }  
     }

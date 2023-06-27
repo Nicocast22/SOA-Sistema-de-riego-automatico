@@ -52,19 +52,27 @@ public class SensorsActivity extends AppCompatActivity implements SensorEventLis
         offText = findViewById(R.id.flashOffText);
         luxValueText = findViewById(R.id.lightSensorValue);
 
-        initializeCamera();
+        initializeCameraAndSensors();
         updateTextStyles(isFlashlightOn);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        // Suscripcion al listener de eventos para el sensor de luz
         sensorManager.registerListener(this, mLight, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        sensorsCleanUp();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
         sensorsCleanUp();
     }
 
@@ -96,7 +104,6 @@ public class SensorsActivity extends AppCompatActivity implements SensorEventLis
             isFlashlightOn = FLASHLIGHT_OFF;
             showToast(getString(R.string.flash_off));
             updateTextStyles(isFlashlightOn);
-
         }
     }
 
@@ -105,7 +112,7 @@ public class SensorsActivity extends AppCompatActivity implements SensorEventLis
 
     }
 
-    private void initializeCamera() {
+    private void initializeCameraAndSensors() {
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mLight = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
 
@@ -119,6 +126,7 @@ public class SensorsActivity extends AppCompatActivity implements SensorEventLis
             cameraId = cameraManager.getCameraIdList()[0];
         } catch (CameraAccessException e) {
             e.printStackTrace();
+            showFlashError();
         }
     }
 

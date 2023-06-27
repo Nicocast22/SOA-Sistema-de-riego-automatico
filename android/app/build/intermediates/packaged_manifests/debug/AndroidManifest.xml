@@ -49,6 +49,13 @@
         android:testOnly="true"
         android:theme="@style/Theme.EcoWater" >
         <activity
+            android:name="com.ecowater.ArduinoActivity"
+            android:exported="false" >
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
             android:name="com.ecowater.BluetoothDevicesActivity"
             android:exported="false"
             android:parentActivityName="com.ecowater.BluetoothActivity"

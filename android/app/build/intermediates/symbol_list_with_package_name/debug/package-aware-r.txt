@@ -1349,6 +1349,8 @@ color cardview_dark_background
 color cardview_light_background
 color cardview_shadow_end_color
 color cardview_shadow_start_color
+color daylight
+color daylightText
 color design_bottom_navigation_shadow_color
 color design_box_stroke_color
 color design_dark_default_color_background
@@ -1391,6 +1393,7 @@ color dim_foreground_disabled_material_dark
 color dim_foreground_disabled_material_light
 color dim_foreground_material_dark
 color dim_foreground_material_light
+color disabled
 color disabledError
 color disabledSuccess
 color error_color_material_dark
@@ -2022,6 +2025,7 @@ color mtrl_textinput_disabled_color
 color mtrl_textinput_filled_box_default_background_color
 color mtrl_textinput_focused_box_stroke_color
 color mtrl_textinput_hovered_box_stroke_color
+color night
 color notification_action_color_filter
 color notification_icon_bg_color
 color primary
@@ -2056,6 +2060,7 @@ color teal_200
 color teal_700
 color tooltip_background_dark
 color tooltip_background_light
+color water
 color white
 dimen abc_action_bar_content_inset_material
 dimen abc_action_bar_content_inset_with_nav
@@ -2913,9 +2918,12 @@ drawable abc_textfield_search_material
 drawable abc_vector_test
 drawable applogo
 drawable arduino
+drawable arduino1
+drawable arduino2
 drawable avd_hide_password
 drawable avd_show_password
 drawable bt
+drawable bt1
 drawable btn_checkbox_checked_mtrl
 drawable btn_checkbox_checked_to_unchecked_mtrl_animation
 drawable btn_checkbox_unchecked_mtrl
@@ -2930,6 +2938,7 @@ drawable design_ic_visibility_off
 drawable design_password_eye
 drawable design_snackbar_background
 drawable flash
+drawable flash1
 drawable ic_arrow_back_black_24
 drawable ic_clear_black_24
 drawable ic_clock_black_24dp
@@ -3088,6 +3097,7 @@ id action_mode_bar_stub
 id action_mode_close_button
 id action_text
 id actions
+id actionsText
 id activity_chooser_view_content
 id add
 id alertTitle
@@ -3102,6 +3112,7 @@ id anticipate
 id appNameLogo
 id arc
 id arduinoBtn
+id arduinoImg
 id asConfigured
 id async
 id auto
@@ -3164,6 +3175,8 @@ id custom
 id customPanel
 id cut
 id date_picker_actions
+id dayMomentText
+id dayStatusText
 id decelerate
 id decelerateAndComplete
 id decor_content_parent
@@ -3193,6 +3206,7 @@ id dragLeft
 id dragRight
 id dragStart
 id dragUp
+id drainageBtn
 id dropdown_menu
 id easeIn
 id easeInOut
@@ -3231,6 +3245,8 @@ id found_devices_list
 id fragment_container_view_tag
 id frost
 id fullscreen_header
+id getDayStatusBtn
+id getWaterLevelBtn
 id ghost_view
 id ghost_view_holder
 id gone
@@ -3378,6 +3394,7 @@ id position
 id postLayout
 id pressed
 id progressBar
+id progressBar2
 id progress_circular
 id progress_horizontal
 id radio
@@ -3529,6 +3546,8 @@ id view_tree_saved_state_registry_owner
 id view_tree_view_model_store_owner
 id visible
 id visible_removing_fragment_view_tag
+id waterTankStatusText
+id waterTankText
 id west
 id withText
 id with_icon
@@ -3651,6 +3670,7 @@ layout abc_search_dropdown_item_icons_2line
 layout abc_search_view
 layout abc_select_dialog_material
 layout abc_tooltip
+layout activity_arduino
 layout activity_bluetooth
 layout activity_bluetooth_devices
 layout activity_main
@@ -3768,9 +3788,11 @@ string app_logo_subtitle
 string app_logo_title
 string app_name
 string appbar_scrolling_view_behavior
+string arduino_actions
 string arduino_interaction
 string available_bt_devices
 string bluetooth
+string bonded
 string bottom_sheet_behavior
 string bottomsheet_action_collapse
 string bottomsheet_action_expand
@@ -3790,8 +3812,11 @@ string character_counter_content_description
 string character_counter_overflowed_content_description
 string character_counter_pattern
 string clear_text_end_icon_content_description
+string day
+string day_moment
 string device_found
 string disable_bt
+string drain_tank
 string enable_bt
 string error_a11y_label
 string error_icon_content_description
@@ -3802,6 +3827,8 @@ string flash_not_available_on_device
 string flash_off
 string flash_on
 string flash_state
+string get_day_status
+string get_water_level
 string hide_bottom_view_on_scroll_behavior
 string icon_content_description
 string item_view_role_description
@@ -3906,6 +3933,9 @@ string mtrl_switch_track_decoration_path
 string mtrl_switch_track_path
 string mtrl_timepicker_cancel
 string mtrl_timepicker_confirm
+string night
+string no_water
+string not_bonded
 string off
 string on
 string oops
@@ -3927,9 +3957,11 @@ string sensors_instructions
 string side_sheet_accessibility_pane_title
 string side_sheet_behavior
 string status_bar_notification_info_overflow
+string tank_status
 string turning_bt_off
 string turning_bt_on
 string unpair
+string with_water
 style AlertDialog_AppCompat
 style AlertDialog_AppCompat_Light
 style Animation_AppCompat_Dialog

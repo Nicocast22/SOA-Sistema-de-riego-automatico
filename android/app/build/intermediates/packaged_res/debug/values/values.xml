@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="black">#FF000000</color>
+    <color name="daylight">#FFF6A7</color>
+    <color name="daylightText">#685F0F</color>
+    <color name="disabled">#C0C0C0</color>
     <color name="disabledError">#D1A3A3</color>
     <color name="disabledSuccess">#B1D0B6</color>
+    <color name="night">#1E2565</color>
     <color name="primary">#0ACDC9</color>
     <color name="primaryDarker">#04918F</color>
     <color name="primaryLighter">#00DCD8</color>
@@ -13,15 +17,18 @@
     <color name="semanticSuccess">#32C84A</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
+    <color name="water">#00C2FF</color>
     <color name="white">#FFFFFFFF</color>
     <string name="app_logo_subtitle">Making your plants happier!</string>
     <string name="app_logo_title">EcoWater</string>
     <string name="app_name">EcoWater</string>
-    <string name="arduino_interaction">Interaccion Arduino</string>
+    <string name="arduino_actions">Acciones Arduino</string>
+    <string name="arduino_interaction">Arduino</string>
     <string name="available_bt_devices">Dispositivos encontrados</string>
     <string name="bluetooth">Bluetooth</string>
+    <string name="bonded">Emparejado</string>
     <string name="bt">Bluetooth</string>
-    <string name="bt_actions">Acciones</string>
+    <string name="bt_actions">Acciones bluetooth</string>
     <string name="bt_device_search_end">Búsqueda de dispositivos finalizada</string>
     <string name="bt_device_search_init">Buscando dispositivos</string>
     <string name="bt_devices">Dispositivos bluetooth</string>
@@ -29,15 +36,23 @@
     <string name="bt_enabled">Bluetooth activado</string>
     <string name="bt_not_available_on_device">Bluetooth no disponible en este dispositivo</string>
     <string name="bt_status">Estado del bluetooth</string>
+    <string name="day">Día</string>
+    <string name="day_moment">Estado del día</string>
     <string name="device_found">Dispositivo encontrado: </string>
     <string name="disable_bt">Desactivar bluetooth</string>
+    <string name="drain_tank">Drenar tanque</string>
     <string name="enable_bt">Activar bluetooth</string>
     <string name="flash_not_available_on_device">Flash no disponible en este dispositivo...</string>
     <string name="flash_off">Flash OFF</string>
     <string name="flash_on">Flash ON</string>
     <string name="flash_state">Estado del flash</string>
+    <string name="get_day_status">Obtener estado del dia</string>
+    <string name="get_water_level">Obtener nivel tanque</string>
     <string name="light_sensor_tooltip">El flash también se puede encender por falta de luz en el ambiente</string>
     <string name="light_sensor_value">Valor del sensor de luz</string>
+    <string name="night">Noche</string>
+    <string name="no_water">Sin agua</string>
+    <string name="not_bonded">No emparejado</string>
     <string name="off">off</string>
     <string name="on">on</string>
     <string name="oops">Oops!</string>
@@ -47,9 +62,11 @@
     <string name="search_devices">Buscar dispositivos</string>
     <string name="sensors">Sensores</string>
     <string name="sensors_instructions">Tape el sensor de luz para prender el flash de su dispositivo</string>
+    <string name="tank_status">Estado del tanque</string>
     <string name="turning_bt_off">Apagando bluetooth</string>
     <string name="turning_bt_on">Encendiendo bluetooth</string>
     <string name="unpair">Desemparejar</string>
+    <string name="with_water">Con agua</string>
     <style name="Theme.EcoWater" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         
         <item name="colorPrimary">@color/primary</item>

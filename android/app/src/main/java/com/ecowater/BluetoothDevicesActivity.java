@@ -7,7 +7,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.view.View;
+import android.view.WindowManager;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,9 +20,10 @@ import java.util.ArrayList;
 
 public class BluetoothDevicesActivity extends AppCompatActivity {
     private ListView aListView;
-    private BluetoothDeviceListAdapter mAdapter;
+    private BluetoothDeviceListAdapter anAdapter;
     private ArrayList<BluetoothDevice> aDeviceList;
     private int aPositionReference;
+    private ProgressBar progressBar;
 
     // Bluetooth
     private final BroadcastReceiver aReceiver = new BroadcastReceiver() {
@@ -32,23 +36,32 @@ public class BluetoothDevicesActivity extends AppCompatActivity {
                     final int prevState = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, BluetoothDevice.ERROR);
                     final int state = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.ERROR);
 
-                    if (state == BluetoothDevice.BOND_BONDED && prevState == BluetoothDevice.BOND_BONDING) {
-                        showToast("Emparejado");
-                        BluetoothDevice dispositivo = (BluetoothDevice) mAdapter.getItem(aPositionReference);
-
-                        //se inicia el Activity de comunicacion con el bluethoot, para transferir los datos.
-                        //Para eso se le envia como parametro la direccion(MAC) del bluethoot Arduino
-                        String direccionBluethoot = dispositivo.getAddress();
-//                    Intent i = new Intent(DeviceListActivity.this, activity_comunicacion.class);
-//                    i.putExtra("Direccion_Bluethoot", direccionBluethoot);
-//
-//                    startActivity(i);
-
-                    } else if (state == BluetoothDevice.BOND_NONE && prevState == BluetoothDevice.BOND_BONDED) {
-                        showToast("No emparejado");
+                    if(prevState == BluetoothDevice.BOND_BONDING) {
+                        progressBar.setVisibility(View.INVISIBLE);
+                        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                     }
 
-                    mAdapter.notifyDataSetChanged();
+                    if (prevState == BluetoothDevice.BOND_BONDING && state == BluetoothDevice.BOND_BONDED) {
+                        showToast(getString(R.string.bonded));
+                        progressBar.setVisibility(View.INVISIBLE);
+                        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+
+                        BluetoothDevice aBondedDevice = (BluetoothDevice) anAdapter.getItem(aPositionReference);
+                        String deviceMacAddress = aBondedDevice.getAddress();
+                        System.out.println(deviceMacAddress);
+                        if (deviceMacAddress.equals(Constants.HC06_MAC_ADDRESS)) {
+                            Intent arduinoIntent = new Intent(BluetoothDevicesActivity.this, ArduinoActivity.class);
+                            arduinoIntent.putExtra("HC06_Mac_Address", deviceMacAddress);
+                            startActivity(arduinoIntent);
+                        }
+
+                    } else if (prevState == BluetoothDevice.BOND_BONDED && state == BluetoothDevice.BOND_NONE) {
+                        showToast(getString(R.string.not_bonded));
+                        progressBar.setVisibility(View.INVISIBLE);
+                        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                    }
+
+                    anAdapter.notifyDataSetChanged();
                     break;
 
             }
@@ -59,6 +72,8 @@ public class BluetoothDevicesActivity extends AppCompatActivity {
         @Override
         public void onButtonClick(int position) {
             BluetoothDevice device = aDeviceList.get(position);
+            progressBar.setVisibility(View.VISIBLE);
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
 
             if (device.getBondState() == BluetoothDevice.BOND_BONDED) {
                 unpairDevice(device);
@@ -66,6 +81,7 @@ public class BluetoothDevicesActivity extends AppCompatActivity {
                 showToast(getString(R.string.pairing));
                 aPositionReference = position;
                 pairDevice(device);
+
             }
         }
     };
@@ -78,14 +94,16 @@ public class BluetoothDevicesActivity extends AppCompatActivity {
         setTitle(getString(R.string.bt_devices));
 
         aListView = (ListView) findViewById(R.id.found_devices_list);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar2);
 
+        progressBar.setVisibility(View.INVISIBLE);
         aDeviceList = getIntent().getExtras().getParcelableArrayList("device.list");
 
-        mAdapter = new BluetoothDeviceListAdapter(this);
-        mAdapter.setData(aDeviceList);
+        anAdapter = new BluetoothDeviceListAdapter(this);
+        anAdapter.setData(aDeviceList);
 
-        mAdapter.setListener(pairDeviceBtnListener);
-        aListView.setAdapter(mAdapter);
+        anAdapter.setListener(pairDeviceBtnListener);
+        aListView.setAdapter(anAdapter);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);

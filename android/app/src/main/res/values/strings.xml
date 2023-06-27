@@ -4,7 +4,7 @@
     <string name="app_logo_subtitle">Making your plants happier!</string>
     <string name="bluetooth">Bluetooth</string>
     <string name="sensors">Sensores</string>
-    <string name="arduino_interaction">Interaccion Arduino</string>
+    <string name="arduino_interaction">Arduino</string>
     <string name="sensors_instructions">Tape el sensor de luz para prender el flash de su dispositivo</string>
     <string name="light_sensor_value">Valor del sensor de luz</string>
     <string name="flash_state">Estado del flash</string>
@@ -12,7 +12,7 @@
     <string name="off">off</string>
     <string name="light_sensor_tooltip">El flash también se puede encender por falta de luz en el ambiente</string>
     <string name="bt_status">Estado del bluetooth</string>
-    <string name="bt_actions">Acciones</string>
+    <string name="bt_actions">Acciones bluetooth</string>
     <string name="enable_bt">Activar bluetooth</string>
     <string name="disable_bt">Desactivar bluetooth</string>
     <string name="search_devices">Buscar dispositivos</string>
@@ -35,4 +35,16 @@
     <string name="pairing">Emparejando dispositivo</string>
     <string name="bt">Bluetooth</string>
     <string name="bt_devices">Dispositivos bluetooth</string>
+    <string name="bonded">Emparejado</string>
+    <string name="not_bonded">No emparejado</string>
+    <string name="day_moment">Estado del día</string>
+    <string name="day">Día</string>
+    <string name="night">Noche</string>
+    <string name="tank_status">Estado del tanque</string>
+    <string name="with_water">Con agua</string>
+    <string name="no_water">Sin agua</string>
+    <string name="drain_tank">Drenar tanque</string>
+    <string name="arduino_actions">Acciones Arduino</string>
+    <string name="get_water_level">Obtener nivel tanque</string>
+    <string name="get_day_status">Obtener estado del dia</string>
 </resources>

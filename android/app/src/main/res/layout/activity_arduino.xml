@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ArduinoActivity">
+
+    <TextView
+        android:id="@+id/waterTankStatusText"
+        android:layout_width="324dp"
+        android:layout_height="73dp"
+        android:layout_marginStart="43dp"
+        android:layout_marginEnd="44dp"
+        android:background="@color/water"
+        android:gravity="center_horizontal|center_vertical"
+        android:text="@string/with_water"
+        android:textColor="@android:color/white"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/actionsText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/waterTankText" />
+
+    <TextView
+        android:id="@+id/waterTankText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="125dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="125dp"
+        android:layout_marginBottom="4dp"
+        android:text="@string/tank_status"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@+id/waterTankStatusText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/dayStatusText" />
+
+    <ImageView
+        android:id="@+id/arduinoImg"
+        android:layout_width="337dp"
+        android:layout_height="249dp"
+        android:layout_marginStart="46dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="46dp"
+        app:layout_constraintBottom_toTopOf="@+id/dayMomentText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/arduino" />
+
+    <TextView
+        android:id="@+id/dayStatusText"
+        android:layout_width="324dp"
+        android:layout_height="73dp"
+        android:layout_marginStart="43dp"
+        android:layout_marginEnd="44dp"
+        android:background="@color/daylight"
+        android:ellipsize="none"
+        android:gravity="center_vertical"
+        android:text="@string/day"
+        android:textAlignment="center"
+        android:textColor="@color/daylightText"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/waterTankText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/dayMomentText" />
+
+    <TextView
+        android:id="@+id/dayMomentText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:text="@string/day_moment"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@+id/dayStatusText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/arduinoImg" />
+
+    <TextView
+        android:id="@+id/actionsText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="164dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="164dp"
+        android:text="@string/arduino_actions"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@+id/drainageBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.506"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/waterTankStatusText" />
+
+    <Button
+        android:id="@+id/drainageBtn"
+        android:layout_width="324dp"
+        android:layout_height="56dp"
+        android:layout_marginStart="43dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="44dp"
+        android:layout_marginBottom="1dp"
+        android:backgroundTint="@color/primary"
+        android:text="@string/drain_tank"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:cornerRadius="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/getDayStatusBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/actionsText" />
+
+    <Button
+        android:id="@+id/getDayStatusBtn"
+        android:layout_width="324dp"
+        android:layout_height="56dp"
+        android:layout_marginStart="43dp"
+        android:layout_marginEnd="44dp"
+        android:layout_marginBottom="2dp"
+        android:backgroundTint="@color/primary"
+        android:text="@string/get_day_status"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:cornerRadius="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/getWaterLevelBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/drainageBtn" />
+
+    <Button
+        android:id="@+id/getWaterLevelBtn"
+        android:layout_width="324dp"
+        android:layout_height="56dp"
+        android:layout_marginStart="43dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="44dp"
+        android:layout_marginBottom="10dp"
+        android:backgroundTint="@color/primary"
+        android:text="@string/get_water_level"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:cornerRadius="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/getDayStatusBtn" />
+</androidx.constraintlayout.widget.ConstraintLayout>

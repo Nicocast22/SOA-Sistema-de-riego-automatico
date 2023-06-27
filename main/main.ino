@@ -373,13 +373,15 @@ bool checkBluetoothCommands()
       }else if(compareString(cmd,SENSORS_VALUE_LIGHT)){
         newEvent = EV_CONT;
         long value = readLightSensor();
-        sendBTInformation((String)value);
+        String info = "L@" + (String)value;
+        sendBTInformation(info);
         return true;
       }else if(compareString(cmd, SENSORS_VALUE_WATER_LEVEL)){
         newEvent = EV_CONT;
         Serial.println("Leyendo sensor agua");
         long value = readWaterLevelSensor();
-        sendBTInformation((String)value);
+        String info = "W@" + (String)value;
+        sendBTInformation(info);
         return true;
       }  
     }

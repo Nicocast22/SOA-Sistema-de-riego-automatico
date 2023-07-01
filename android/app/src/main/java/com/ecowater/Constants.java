@@ -10,7 +10,7 @@ public interface Constants {
     String ACTIONS_DRAIN = "ACD";
     String SENSORS_VALUE_LIGHT = "SVL";
     String SENSORS_VALUE_WATER_LEVEL = "SVW";
-    String HC06_MAC_ADDRESS = "84:5F:04:1D:F0:7B";
+    String HC05_MAC_ADDRESS = "98:D3:32:70:C3:38";
 
     int THRESHOLD_NO_WATER = 900;
     int IS_NIGHTFALL = 1;

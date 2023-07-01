@@ -53,14 +53,14 @@ public class MainActivity extends AppCompatActivity {
         checkConnectionWithArduino();
     }
 
-    // Comprobamos si el dispositivo esta vinculado al HC06, para habilitar el boton de la activity correspondiente
+    // Comprobamos si el dispositivo esta vinculado al HC05, para habilitar el boton de la activity correspondiente
     private void checkConnectionWithArduino() {
         @SuppressLint("MissingPermission") Set<BluetoothDevice> pairedDevices = aBluetoothAdapter.getBondedDevices();
 
         if (pairedDevices.size() > 0) {
             for (BluetoothDevice device : pairedDevices) {
                 String deviceAddress = device.getAddress();
-                if (deviceAddress.equals(Constants.HC06_MAC_ADDRESS)) {
+                if (deviceAddress.equals(Constants.HC05_MAC_ADDRESS)) {
                     arduinoBtn.setEnabled(true);
                 }
             }

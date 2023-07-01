@@ -49,9 +49,9 @@ public class BluetoothDevicesActivity extends AppCompatActivity {
                         BluetoothDevice aBondedDevice = (BluetoothDevice) anAdapter.getItem(aPositionReference);
                         String deviceMacAddress = aBondedDevice.getAddress();
                         System.out.println(deviceMacAddress);
-                        if (deviceMacAddress.equals(Constants.HC06_MAC_ADDRESS)) {
+                        if (deviceMacAddress.equals(Constants.HC05_MAC_ADDRESS)) {
                             Intent arduinoIntent = new Intent(BluetoothDevicesActivity.this, ArduinoActivity.class);
-                            arduinoIntent.putExtra("HC06_Mac_Address", deviceMacAddress);
+                            arduinoIntent.putExtra("HC05_Mac_Address", deviceMacAddress);
                             startActivity(arduinoIntent);
                         }
 

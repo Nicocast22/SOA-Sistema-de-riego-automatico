@@ -19,8 +19,7 @@ public class BluetoothService {
     public static final int STATE_CONNECTING = 2; // now initiating an outgoing connection
     public static final int STATE_CONNECTED = 3;
 
-    //private static final UUID BTMODULEUUID = UUID.fromString("7fd7c9c5-771d-43f3-9a15-8af772bfdd68");
-    private static final UUID BT_UUID_SECURE = UUID.fromString("fa87c0d0-afac-11de-8a39-0800200c9a66");
+    private static final UUID BT_UUID_SECURE = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private static final UUID BT_UUID_INSECURE = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
     private final BluetoothAdapter aBluetoothAdapter;
     private final Handler aHandler;
@@ -282,6 +281,7 @@ public class BluetoothService {
 
             // Escribimos y enviamos al handler
             try {
+                System.out.println("BUFFER" + buffer);
                 anOutputStream.write(buffer);
                 aHandler.obtainMessage(Constants.MESSAGE_WRITE, -1, -1, buffer).sendToTarget();
             } catch (IOException e) {

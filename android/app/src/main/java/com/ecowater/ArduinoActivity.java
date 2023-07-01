@@ -22,6 +22,7 @@ public class ArduinoActivity extends AppCompatActivity {
     private BluetoothService aBluetoothService = null;
     private StringBuffer anOutStringBuffer;
     private String aConnectedDeviceName = null;
+    private StringBuilder aDataString = new StringBuilder();
 
     private Float lightSensorValue;
     private Float waterLevelSensorValue;
@@ -56,8 +57,21 @@ public class ArduinoActivity extends AppCompatActivity {
                 case Constants.MESSAGE_READ:
                     byte[] readBuf = (byte[]) msg.obj;
                     // Mensaje recibido desde el Arduino
+
                     String readMessage = new String(readBuf, 0, msg.arg1);
-                    decodifyMessage(readMessage);
+                    aDataString.append(readMessage);
+
+                    // Esperamos a un fin de linea
+                    int isEndOfLine = aDataString.indexOf("\r\n");
+
+                    if (isEndOfLine > 0) {
+                        // Obtenemos la linea completa y la decodificamos
+                        String newString = aDataString.substring(0, isEndOfLine);
+                        decodifyMessage(newString);
+
+                        // Limpiamos nuestro "buffer"
+                        aDataString.delete(0, aDataString.length());
+                    }
                     break;
                 case Constants.MESSAGE_DEVICE_NAME:
                     aConnectedDeviceName = msg.getData().getString(Constants.DEVICE_NAME);
@@ -111,6 +125,18 @@ public class ArduinoActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        aBluetoothService.stop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        aBluetoothService.stop();
+    }
+
     // Utils
     private void showToast(String message) {
         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
@@ -133,7 +159,7 @@ public class ArduinoActivity extends AppCompatActivity {
     // Bluetooth utils
     private void connectDevice(Intent data, boolean secure) {
         Bundle extras = data.getExtras();
-        String address = (extras != null) ? extras.getString("HC06_Mac_Address") : Constants.HC06_MAC_ADDRESS;
+        String address = (extras != null) ? extras.getString("HC05_Mac_Address") : Constants.HC05_MAC_ADDRESS;
 
         BluetoothDevice aBluetoothDevice = aBluetoothAdapter.getRemoteDevice(address);
 
@@ -174,6 +200,7 @@ public class ArduinoActivity extends AppCompatActivity {
 
         if (message.length() > 0) {
             byte[] send = message.getBytes();
+            System.out.println("MESSAGE " + message);
             aBluetoothService.write(send);
 
             anOutStringBuffer.setLength(0);

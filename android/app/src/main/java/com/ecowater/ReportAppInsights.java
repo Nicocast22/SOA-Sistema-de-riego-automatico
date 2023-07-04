@@ -27,7 +27,11 @@ public class ReportAppInsights {
         return instance;
     }
 
-    public void reportEcoWaterEvent(HashMap<String, String> map) {
+    public void reportArduinoSensorEvent(ArduinoSensorEventModel event) {
+        this.reportEcoWaterEvent(event.asHashMap());
+    }
+
+    private void reportEcoWaterEvent(HashMap<String, String> map) {
         Analytics.trackEvent("EcoWaterEvent",map);
     }
 }

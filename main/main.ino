@@ -61,7 +61,7 @@
 #define PIN_RAIN_SENSOR                                 8
 #define PIN_WATER_MOVEMENT_SERVO                        9
 #define PIN_TANK_DOOR_SERVO                             11
-#define PIN_LIGHT_SENSOR                                13 
+#define PIN_LIGHT_SENSOR                                A2 
             
 
 
@@ -191,7 +191,11 @@ long readHumiditySensor()
 
 long readLightSensor()
 {
-  return digitalRead(PIN_LIGHT_SENSOR);
+  if(analogRead(PIN_LIGHT_SENSOR) > 1000) {
+    return 0;
+  } else {
+    return 1;
+  }
 }
 
 long readWaterLevelSensor()

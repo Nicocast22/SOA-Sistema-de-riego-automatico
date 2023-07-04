@@ -1,6 +1,7 @@
 package com.ecowater;
 
-public interface Constants {
+public interface Constants
+{
     int MESSAGE_STATE_CHANGE = 1;
     int MESSAGE_READ = 2;
     int MESSAGE_WRITE = 3;

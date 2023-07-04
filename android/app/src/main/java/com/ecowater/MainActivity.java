@@ -40,6 +40,9 @@ public class MainActivity extends AppCompatActivity {
         btBtn = (Button) findViewById(R.id.bluetoothBtn);
         arduinoBtn = (Button) findViewById(R.id.arduinoBtn);
         sensorsBtn = (Button) findViewById(R.id.sensorsBtn);
+
+        // Injectamos la app en el Singleton
+        ReportAppInsights.appToReport = getApplication();
     }
 
     @Override

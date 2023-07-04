@@ -13,7 +13,7 @@ public class ReportAppInsights {
     public static Application appToReport;
     private ReportAppInsights()
     {
-        AppCenter.start(appToReport, "APPSECRET",
+        AppCenter.start(appToReport, "MyAppSecret",
                 Analytics.class, Crashes.class);
 
     }

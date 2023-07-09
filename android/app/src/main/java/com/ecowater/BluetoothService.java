@@ -14,7 +14,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
 
-public class BluetoothService {
+public class BluetoothService
+{
     public static final int STATE_NONE = 0;       // we're doing nothing
     public static final int STATE_CONNECTING = 2; // now initiating an outgoing connection
     public static final int STATE_CONNECTED = 3;
@@ -28,34 +29,40 @@ public class BluetoothService {
     private int aState;
     private int aNewState;
 
-    public BluetoothService(Context context, Handler handler) {
+    public BluetoothService(Context context, Handler handler)
+    {
         aBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         aState = STATE_NONE;
         aNewState = aState;
         aHandler = handler;
     }
 
-    private synchronized void updateStatusBarTitle() {
+    private synchronized void updateStatusBarTitle()
+    {
         aState = getState();
         aNewState = aState;
 
         aHandler.obtainMessage(Constants.MESSAGE_STATE_CHANGE, aNewState, -1).sendToTarget();
     }
 
-    public synchronized int getState() {
+    public synchronized int getState()
+    {
         return aState;
     }
 
-    public synchronized void start() {
+    public synchronized void start()
+    {
 
         // Cancelamos cualquier intento conexion en proceso
-        if (aConnectThread != null) {
+        if (aConnectThread != null)
+        {
             aConnectThread.cancel();
             aConnectThread = null;
         }
 
         // Cancelamos cualquier conexion en proceso
-        if (aConnectedThread != null) {
+        if (aConnectedThread != null)
+        {
             aConnectedThread.cancel();
             aConnectedThread = null;
         }
@@ -63,18 +70,22 @@ public class BluetoothService {
         updateStatusBarTitle();
     }
 
-    public synchronized void connect(BluetoothDevice device, boolean secure) {
+    public synchronized void connect(BluetoothDevice device, boolean secure)
+    {
 
         // Cancelamos cualquier intento conexion en proceso
-        if (aState == STATE_CONNECTING) {
-            if (aConnectThread != null) {
+        if (aState == STATE_CONNECTING)
+        {
+            if (aConnectThread != null)
+            {
                 aConnectThread.cancel();
                 aConnectThread = null;
             }
         }
 
         // Cancelamos cualquier conexion en proceso
-        if (aConnectedThread != null) {
+        if (aConnectedThread != null)
+        {
             aConnectedThread.cancel();
             aConnectedThread = null;
         }
@@ -87,16 +98,19 @@ public class BluetoothService {
     }
 
     @SuppressLint("MissingPermission")
-    public synchronized void connected(BluetoothSocket socket, BluetoothDevice device, final String socketType) {
+    public synchronized void connected(BluetoothSocket socket, BluetoothDevice device, final String socketType)
+    {
 
         // Cancelamos el thread de conexion
-        if (aConnectThread != null) {
+        if (aConnectThread != null)
+        {
             aConnectThread.cancel();
             aConnectThread = null;
         }
 
         // Cancelamos cualquier thread intentando conectarse
-        if (aConnectedThread != null) {
+        if (aConnectedThread != null)
+        {
             aConnectedThread.cancel();
             aConnectedThread = null;
         }
@@ -116,13 +130,16 @@ public class BluetoothService {
     }
 
     // Cancelacion de threads
-    public synchronized void stop() {
-        if (aConnectThread != null) {
+    public synchronized void stop()
+    {
+        if (aConnectThread != null)
+        {
             aConnectThread.cancel();
             aConnectThread = null;
         }
 
-        if (aConnectedThread != null) {
+        if (aConnectedThread != null)
+        {
             aConnectedThread.cancel();
             aConnectedThread = null;
         }
@@ -133,10 +150,12 @@ public class BluetoothService {
 
 
     // Escritura en thread de datos
-    public void write(byte[] out) {
+    public void write(byte[] out)
+    {
         ConnectedThread r;
 
-        synchronized (this) {
+        synchronized (this)
+        {
             if (aState != STATE_CONNECTED) return;
             r = aConnectedThread;
         }
@@ -145,7 +164,8 @@ public class BluetoothService {
     }
 
     // Conexion fallida
-    private void connectionFailed() {
+    private void connectionFailed()
+    {
         Message msg = aHandler.obtainMessage(Constants.MESSAGE_TOAST);
         Bundle bundle = new Bundle();
         bundle.putString(Constants.TOAST, "No fue posible conectarse al dispositivo");
@@ -161,7 +181,8 @@ public class BluetoothService {
     }
 
     // Conexion perdida
-    private void connectionLost() {
+    private void connectionLost()
+    {
         Message msg = aHandler.obtainMessage(Constants.MESSAGE_TOAST);
         Bundle bundle = new Bundle();
         bundle.putString(Constants.TOAST, "Se perdio la conexion con el dispositivo");
@@ -178,39 +199,51 @@ public class BluetoothService {
 
 
     // Thread que intenta realizar la conexion con el dispositivo bluetooth
-    private class ConnectThread extends Thread {
+    private class ConnectThread extends Thread
+    {
         private final BluetoothSocket aSocket;
         private final BluetoothDevice aDevice;
-        private String aSocketType;
+        private final String aSocketType;
 
         @SuppressLint("MissingPermission")
-        public ConnectThread(BluetoothDevice device, boolean secure) {
+        public ConnectThread(BluetoothDevice device, boolean secure)
+        {
             aDevice = device;
             BluetoothSocket tmp = null;
             aSocketType = secure ? "Secure" : "Insecure";
 
-            try {
-                if (secure) {
+            try
+            {
+                if (secure)
+                {
                     tmp = device.createRfcommSocketToServiceRecord(BT_UUID_SECURE);
-                } else {
+                } else
+                {
                     tmp = device.createInsecureRfcommSocketToServiceRecord(BT_UUID_INSECURE);
                 }
-            } catch (IOException e) {
+            } catch (IOException e)
+            {
+                e.printStackTrace();
             }
             aSocket = tmp;
             aState = STATE_CONNECTING;
         }
 
         @SuppressLint("MissingPermission")
-        public void run() {
+        public void run()
+        {
             aBluetoothAdapter.cancelDiscovery();
 
-            try {
+            try
+            {
                 aSocket.connect();
-            } catch (IOException e) {
-                try {
+            } catch (IOException e)
+            {
+                try
+                {
                     aSocket.close();
-                } catch (IOException e2) {
+                } catch (IOException e2)
+                {
                     e2.printStackTrace();
                 }
                 e.printStackTrace();
@@ -219,7 +252,8 @@ public class BluetoothService {
             }
 
             // Reseteamos el thread
-            synchronized (BluetoothService.this) {
+            synchronized (BluetoothService.this)
+            {
                 aConnectThread = null;
             }
 
@@ -227,30 +261,37 @@ public class BluetoothService {
             connected(aSocket, aDevice, aSocketType);
         }
 
-        public void cancel() {
-            try {
+        public void cancel()
+        {
+            try
+            {
                 aSocket.close();
-            } catch (IOException e) {
+            } catch (IOException e)
+            {
                 e.printStackTrace();
             }
         }
     }
 
     // Thread que envia y recibe datos de los dispositivos conectados
-    private class ConnectedThread extends Thread {
+    private class ConnectedThread extends Thread
+    {
         private final BluetoothSocket aSocket;
         private final InputStream anInputStream;
         private final OutputStream anOutputStream;
 
-        public ConnectedThread(BluetoothSocket socket, String socketType) {
+        public ConnectedThread(BluetoothSocket socket, String socketType)
+        {
             aSocket = socket;
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
 
-            try {
+            try
+            {
                 tmpIn = socket.getInputStream();
                 tmpOut = socket.getOutputStream();
-            } catch (IOException e) {
+            } catch (IOException e)
+            {
                 e.printStackTrace();
             }
 
@@ -259,17 +300,21 @@ public class BluetoothService {
             aState = STATE_CONNECTED;
         }
 
-        public void run() {
+        public void run()
+        {
             byte[] buffer = new byte[1024];
             int bytes;
 
-            while (aState == STATE_CONNECTED) {
+            while (aState == STATE_CONNECTED)
+            {
 
                 // Leemos y enviamos al handler
-                try {
+                try
+                {
                     bytes = anInputStream.read(buffer);
                     aHandler.obtainMessage(Constants.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
-                } catch (IOException e) {
+                } catch (IOException e)
+                {
                     e.printStackTrace();
                     connectionLost();
                     break;
@@ -277,22 +322,27 @@ public class BluetoothService {
             }
         }
 
-        public void write(byte[] buffer) {
+        public void write(byte[] buffer)
+        {
 
             // Escribimos y enviamos al handler
-            try {
-                System.out.println("BUFFER" + buffer);
+            try
+            {
                 anOutputStream.write(buffer);
                 aHandler.obtainMessage(Constants.MESSAGE_WRITE, -1, -1, buffer).sendToTarget();
-            } catch (IOException e) {
+            } catch (IOException e)
+            {
                 e.printStackTrace();
             }
         }
 
-        public void cancel() {
-            try {
+        public void cancel()
+        {
+            try
+            {
                 aSocket.close();
-            } catch (IOException e) {
+            } catch (IOException e)
+            {
                 e.printStackTrace();
             }
         }

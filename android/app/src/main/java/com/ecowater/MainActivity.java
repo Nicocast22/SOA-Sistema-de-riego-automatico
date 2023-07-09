@@ -13,7 +13,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.Set;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+{
 
     private Button btBtn;
     private Button arduinoBtn;
@@ -21,16 +22,25 @@ public class MainActivity extends AppCompatActivity {
     private BluetoothAdapter aBluetoothAdapter;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         // Ocultamos la actionBar en la mainScreen
-        getSupportActionBar().hide();
+        try
+        {
+            getSupportActionBar().hide();
+
+        } catch (NullPointerException e)
+        {
+            e.printStackTrace();
+        }
 
         // Si no soportamos Bluetooth, finalizamos la activity y con ello la app.
         // Este check se realiza en BluetoothActivity tambien, siendo redundante.
-        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)) {
+        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH))
+        {
             Toast.makeText(this, "Bluetooth no soportado", Toast.LENGTH_SHORT).show();
             finish();
         }
@@ -43,7 +53,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStart() {
+    protected void onStart()
+    {
         super.onStart();
 
         btBtn.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, BluetoothActivity.class)));
@@ -54,17 +65,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Comprobamos si el dispositivo esta vinculado al HC05, para habilitar el boton de la activity correspondiente
-    private void checkConnectionWithArduino() {
+    private void checkConnectionWithArduino()
+    {
         @SuppressLint("MissingPermission") Set<BluetoothDevice> pairedDevices = aBluetoothAdapter.getBondedDevices();
 
-        if (pairedDevices.size() > 0) {
-            for (BluetoothDevice device : pairedDevices) {
+        if (pairedDevices.size() > 0)
+        {
+            for (BluetoothDevice device : pairedDevices)
+            {
                 String deviceAddress = device.getAddress();
-                if (deviceAddress.equals(Constants.HC05_MAC_ADDRESS)) {
+                if (deviceAddress.equals(Constants.HC05_MAC_ADDRESS))
+                {
                     arduinoBtn.setEnabled(true);
                 }
             }
-        } else {
+        } else
+        {
             arduinoBtn.setEnabled(false);
         }
     }

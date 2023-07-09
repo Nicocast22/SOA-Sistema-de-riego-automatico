@@ -13,40 +13,49 @@ import android.widget.TextView;
 
 import java.util.List;
 
-public class BluetoothDeviceListAdapter extends BaseAdapter {
-    private LayoutInflater anInflater;
+public class BluetoothDeviceListAdapter extends BaseAdapter
+{
+    private final LayoutInflater anInflater;
     private List<BluetoothDevice> devicesList;
     private ButtonOnClickListener aListener;
 
-    public BluetoothDeviceListAdapter(Context context) {
+    public BluetoothDeviceListAdapter(Context context)
+    {
         anInflater = LayoutInflater.from(context);
     }
 
-    public void setData(List<BluetoothDevice> data) {
+    public void setData(List<BluetoothDevice> data)
+    {
         devicesList = data;
     }
 
-    public void setListener(ButtonOnClickListener listener) {
+    public void setListener(ButtonOnClickListener listener)
+    {
         aListener = listener;
     }
 
-    public int getCount() {
+    public int getCount()
+    {
         return devicesList.size();
     }
 
-    public Object getItem(int position) {
+    public Object getItem(int position)
+    {
         return devicesList.get(position);
     }
 
-    public long getItemId(int position) {
+    public long getItemId(int position)
+    {
         return position;
     }
 
     @SuppressLint("MissingPermission")
-    public View getView(final int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent)
+    {
         ViewHolder holder;
 
-        if (convertView == null) {
+        if (convertView == null)
+        {
             convertView = anInflater.inflate(R.layout.bluetooth_device, null);
 
             holder = new ViewHolder();
@@ -56,7 +65,8 @@ public class BluetoothDeviceListAdapter extends BaseAdapter {
             holder.pairBtn = (Button) convertView.findViewById(R.id.pairBtn);
 
             convertView.setTag(holder);
-        } else {
+        } else
+        {
             holder = (ViewHolder) convertView.getTag();
         }
 
@@ -65,23 +75,24 @@ public class BluetoothDeviceListAdapter extends BaseAdapter {
         holder.deviceName.setText(device.getName());
         holder.deviceMacAddress.setText(device.getAddress());
         holder.pairBtn.setText((device.getBondState() == BluetoothDevice.BOND_BONDED) ? "Desemparejar" : "Emparejar");
-        holder.pairBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (aListener != null) {
-                    aListener.onButtonClick(position);
-                }
+        holder.pairBtn.setOnClickListener(v ->
+        {
+            if (aListener != null)
+            {
+                aListener.onButtonClick(position);
             }
         });
 
         return convertView;
     }
 
-    public interface ButtonOnClickListener {
-        public abstract void onButtonClick(int position);
+    public interface ButtonOnClickListener
+    {
+        void onButtonClick(int position);
     }
 
-    static class ViewHolder {
+    static class ViewHolder
+    {
         TextView deviceName;
         TextView deviceMacAddress;
         TextView pairBtn;

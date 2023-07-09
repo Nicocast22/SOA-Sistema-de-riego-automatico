@@ -24,7 +24,8 @@ import androidx.core.content.ContextCompat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BluetoothActivity extends AppCompatActivity {
+public class BluetoothActivity extends AppCompatActivity
+{
 
     private static final int PERMISSIONS_CODE = 4;
     private final static int REQUEST_ENABLE_BT = 1000;
@@ -42,12 +43,15 @@ public class BluetoothActivity extends AppCompatActivity {
     private TextView offText;
 
     // Bluetooth
-    private final BroadcastReceiver aReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver aReceiver = new BroadcastReceiver()
+    {
         @SuppressLint("MissingPermission")
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive(Context context, Intent intent)
+        {
             String action = intent.getAction();
 
-            switch (action) {
+            switch (action)
+            {
                 case BluetoothAdapter.ACTION_STATE_CHANGED:
                     final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
                     showBluetoothStatusAndUpdateLayout(state);
@@ -80,23 +84,30 @@ public class BluetoothActivity extends AppCompatActivity {
     };
 
     // Listeners
-    private void enableAndInitializeButtons() {
-        toggleBtBtn.setOnClickListener(new View.OnClickListener() {
+    private void enableAndInitializeButtons()
+    {
+        toggleBtBtn.setOnClickListener(new View.OnClickListener()
+        {
             @SuppressLint("MissingPermission")
-            public void onClick(View v) {
-                if (aBluetoothAdapter.isEnabled()) {
+            public void onClick(View v)
+            {
+                if (aBluetoothAdapter.isEnabled())
+                {
                     aBluetoothAdapter.disable();
                     showBluetoothStatusAndUpdateLayout(BluetoothAdapter.STATE_OFF);
-                } else {
+                } else
+                {
                     Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                     startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
                 }
             }
         });
 
-        searchDevicesBtBtn.setOnClickListener(new View.OnClickListener() {
+        searchDevicesBtBtn.setOnClickListener(new View.OnClickListener()
+        {
             @SuppressLint("MissingPermission")
-            public void onClick(View v) {
+            public void onClick(View v)
+            {
                 aBluetoothAdapter.startDiscovery();
             }
         });
@@ -104,7 +115,8 @@ public class BluetoothActivity extends AppCompatActivity {
 
     // Lifecycle
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth);
         setTitle(getString(R.string.bluetooth));
@@ -125,9 +137,12 @@ public class BluetoothActivity extends AppCompatActivity {
     }
 
     @SuppressLint("MissingPermission")
-    public void onPause() {
-        if (aBluetoothAdapter != null) {
-            if (aBluetoothAdapter.isDiscovering()) {
+    public void onPause()
+    {
+        if (aBluetoothAdapter != null)
+        {
+            if (aBluetoothAdapter.isDiscovering())
+            {
                 aBluetoothAdapter.cancelDiscovery();
             }
         }
@@ -135,17 +150,20 @@ public class BluetoothActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onDestroy() {
+    protected void onDestroy()
+    {
         unregisterReceiver(aReceiver);
         super.onDestroy();
     }
 
     // Bluetooth utils
-    private boolean isBluetoothAvailable() {
+    private boolean isBluetoothAvailable()
+    {
         return aBluetoothAdapter != null;
     }
 
-    private void createIntentFilterAndRegisterReceiver() {
+    private void createIntentFilterAndRegisterReceiver()
+    {
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         filter.addAction(BluetoothDevice.ACTION_FOUND);
@@ -156,8 +174,10 @@ public class BluetoothActivity extends AppCompatActivity {
     }
 
     // Permissions
-    private void checkForPermissions() {
-        if (!isBluetoothAvailable()) {
+    private void checkForPermissions()
+    {
+        if (!isBluetoothAvailable())
+        {
             showToast(getString(R.string.bt_not_available_on_device));
             finish();
         }
@@ -165,53 +185,64 @@ public class BluetoothActivity extends AppCompatActivity {
         int result;
         List<String> listPermissionsNeeded = new ArrayList<>();
 
-        for (String p : permissions) {
+        for (String p : permissions)
+        {
             result = ContextCompat.checkSelfPermission(this, p);
-            if (result != PackageManager.PERMISSION_GRANTED) {
+            if (result != PackageManager.PERMISSION_GRANTED)
+            {
                 listPermissionsNeeded.add(p);
             }
         }
-        if (!listPermissionsNeeded.isEmpty()) {
+        if (!listPermissionsNeeded.isEmpty())
+        {
             ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), PERMISSIONS_CODE);
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                                           int[] grantResults) {
+                                           int[] grantResults)
+    {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
+        switch (requestCode)
+        {
             case PERMISSIONS_CODE:
                 if (grantResults.length > 0 &&
-                        grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                {
                     showToast("Permisos OK");
-                } else {
+                } else
+                {
                     showToast("Permisos denegados");
                     finish();
                 }
-                return;
         }
     }
 
     // Layout utils
-    protected void refreshLayout() {
+    protected void refreshLayout()
+    {
         showBluetoothStatusAndUpdateLayout(aBluetoothAdapter.getState());
         enableAndInitializeButtons();
     }
 
-    private void showToast(String message) {
+    private void showToast(String message)
+    {
         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
 
-    private void updateButtonsAndShowText(boolean toggleBtnStatus, boolean searchDevicesBtBtnStatus, String warning) {
+    private void updateButtonsAndShowText(boolean toggleBtnStatus, boolean searchDevicesBtBtnStatus, String warning)
+    {
         toggleBtBtn.setEnabled(toggleBtnStatus);
         searchDevicesBtBtn.setEnabled(searchDevicesBtBtnStatus);
 
         showToast(warning);
     }
 
-    private void showBluetoothStatusAndUpdateLayout(int bluetoothStatus) {
-        switch (bluetoothStatus) {
+    private void showBluetoothStatusAndUpdateLayout(int bluetoothStatus)
+    {
+        switch (bluetoothStatus)
+        {
             case BluetoothAdapter.STATE_TURNING_OFF:
                 showToast(getString(R.string.turning_bt_off));
                 break;

@@ -18,7 +18,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-public class SensorsActivity extends AppCompatActivity implements SensorEventListener {
+public class SensorsActivity extends AppCompatActivity implements SensorEventListener
+{
 
     // Light sensor
     private final int LUX_THRESHOLD = 1;
@@ -43,7 +44,8 @@ public class SensorsActivity extends AppCompatActivity implements SensorEventLis
 
     // Lifecycle
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sensors);
         setTitle(getString(R.string.sensors));
@@ -57,7 +59,8 @@ public class SensorsActivity extends AppCompatActivity implements SensorEventLis
     }
 
     @Override
-    protected void onResume() {
+    protected void onResume()
+    {
         super.onResume();
 
         // Suscripcion al listener de eventos para el sensor de luz
@@ -65,19 +68,22 @@ public class SensorsActivity extends AppCompatActivity implements SensorEventLis
     }
 
     @Override
-    protected void onPause() {
+    protected void onPause()
+    {
         super.onPause();
         sensorsCleanUp();
     }
 
     @Override
-    protected void onStop() {
+    protected void onStop()
+    {
         super.onStop();
         sensorsCleanUp();
     }
 
     @Override
-    protected void onDestroy() {
+    protected void onDestroy()
+    {
         super.onDestroy();
         sensorsCleanUp();
     }
@@ -85,12 +91,14 @@ public class SensorsActivity extends AppCompatActivity implements SensorEventLis
     // Sensors
     @SuppressLint("SetTextI18n")
     @Override
-    public void onSensorChanged(SensorEvent event) {
+    public void onSensorChanged(SensorEvent event)
+    {
         float lux = event.values[0];
 
         luxValueText.setText(Float.toString(lux));
 
-        if (lux <= LUX_THRESHOLD && !isFlashlightOn) {
+        if (lux <= LUX_THRESHOLD && !isFlashlightOn)
+        {
             toggleFlashlight(FLASHLIGHT_ON);
 
             isFlashlightOn = FLASHLIGHT_ON;
@@ -98,7 +106,8 @@ public class SensorsActivity extends AppCompatActivity implements SensorEventLis
             updateTextStyles(isFlashlightOn);
         }
 
-        if (lux > LUX_THRESHOLD && isFlashlightOn) {
+        if (lux > LUX_THRESHOLD && isFlashlightOn)
+        {
             toggleFlashlight(FLASHLIGHT_OFF);
 
             isFlashlightOn = FLASHLIGHT_OFF;
@@ -108,59 +117,74 @@ public class SensorsActivity extends AppCompatActivity implements SensorEventLis
     }
 
     @Override
-    public void onAccuracyChanged(Sensor sensor, int i) {
+    public void onAccuracyChanged(Sensor sensor, int i)
+    {
 
     }
 
-    private void initializeCameraAndSensors() {
+    private void initializeCameraAndSensors()
+    {
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mLight = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
 
         boolean isFlashlightAvailable = getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY) && getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
-        if (!isFlashlightAvailable) {
+        if (!isFlashlightAvailable)
+        {
             showFlashError();
         }
 
         cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
-        try {
+        try
+        {
             cameraId = cameraManager.getCameraIdList()[0];
-        } catch (CameraAccessException e) {
+        } catch (CameraAccessException e)
+        {
             e.printStackTrace();
             showFlashError();
         }
     }
 
-    private void toggleFlashlight(boolean status) {
-        try {
+    private void toggleFlashlight(boolean status)
+    {
+        try
+        {
             cameraManager.setTorchMode(cameraId, status);
-        } catch (CameraAccessException e) {
+        } catch (CameraAccessException e)
+        {
             e.printStackTrace();
         }
     }
 
-    private void sensorsCleanUp() {
-        if (isFlashlightOn) {
+    private void sensorsCleanUp()
+    {
+        if (isFlashlightOn)
+        {
             toggleFlashlight(FLASHLIGHT_OFF);
         }
         sensorManager.unregisterListener(this);
     }
 
     // Layout utils
-    private void showToast(String text) {
+    private void showToast(String text)
+    {
         Toast.makeText(SensorsActivity.this, text, Toast.LENGTH_SHORT).show();
     }
 
-    private void updateTextStyles(boolean flashlightStatus) {
-        if (flashlightStatus) {
+    private void updateTextStyles(boolean flashlightStatus)
+    {
+        if (flashlightStatus)
+        {
             onText.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.semanticSuccess));
             offText.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.disabledError));
-        } else {
+        } else
+        {
             onText.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.disabledSuccess));
             offText.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.semanticError));
         }
     }
 
-    public void showFlashError() {
+    public void showFlashError()
+    {
         AlertDialog alert = new AlertDialog.Builder(this).create();
         alert.setTitle(getString(R.string.oops));
         alert.setMessage(getString(R.string.flash_not_available_on_device));

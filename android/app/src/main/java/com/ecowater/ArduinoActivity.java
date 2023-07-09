@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,14 +15,14 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-public class ArduinoActivity extends AppCompatActivity {
+public class ArduinoActivity extends AppCompatActivity
+{
 
+    private final StringBuilder aDataString = new StringBuilder();
     private BluetoothAdapter aBluetoothAdapter = null;
     private BluetoothService aBluetoothService = null;
     private StringBuffer anOutStringBuffer;
     private String aConnectedDeviceName = null;
-    private StringBuilder aDataString = new StringBuilder();
-
     private Float lightSensorValue;
     private Float waterLevelSensorValue;
     private Button drainageBtn;
@@ -32,12 +31,16 @@ public class ArduinoActivity extends AppCompatActivity {
     private TextView dayStatus;
     private TextView tankStatus;
     @SuppressLint("HandlerLeak")
-    private final Handler aHandler = new Handler() {
+    private final Handler aHandler = new Handler()
+    {
         @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
+        public void handleMessage(Message msg)
+        {
+            switch (msg.what)
+            {
                 case Constants.MESSAGE_STATE_CHANGE:
-                    switch (msg.arg1) {
+                    switch (msg.arg1)
+                    {
                         case BluetoothService.STATE_CONNECTED:
                             setStatus("Conectado a" + aConnectedDeviceName);
                             break;
@@ -64,7 +67,8 @@ public class ArduinoActivity extends AppCompatActivity {
                     // Esperamos a un fin de linea
                     int isEndOfLine = aDataString.indexOf("\r\n");
 
-                    if (isEndOfLine > 0) {
+                    if (isEndOfLine > 0)
+                    {
                         // Obtenemos la linea completa y la decodificamos
                         String newString = aDataString.substring(0, isEndOfLine);
                         decodifyMessage(newString);
@@ -86,7 +90,8 @@ public class ArduinoActivity extends AppCompatActivity {
 
     // Lifecycle
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_arduino);
         setTitle(getString(R.string.arduino_interaction));
@@ -105,7 +110,8 @@ public class ArduinoActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStart() {
+    protected void onStart()
+    {
         super.onStart();
 
         Intent intent = getIntent();
@@ -115,92 +121,94 @@ public class ArduinoActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onResume() {
+    public void onResume()
+    {
         super.onResume();
 
-        if (aBluetoothService != null) {
-            if (aBluetoothService.getState() == BluetoothService.STATE_NONE) {
+        if (aBluetoothService != null)
+        {
+            if (aBluetoothService.getState() == BluetoothService.STATE_NONE)
+            {
                 aBluetoothService.start();
             }
         }
     }
 
     @Override
-    protected void onStop() {
+    protected void onStop()
+    {
         super.onStop();
         aBluetoothService.stop();
     }
 
     @Override
-    protected void onDestroy() {
+    protected void onDestroy()
+    {
         super.onDestroy();
         aBluetoothService.stop();
     }
 
     // Utils
-    private void showToast(String message) {
+    private void showToast(String message)
+    {
         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
 
-    private void setStatus(CharSequence subTitle) {
+    private void setStatus(CharSequence subTitle)
+    {
         final android.app.ActionBar actionBar = this.getActionBar();
-        if (null == actionBar) {
+        if (null == actionBar)
+        {
             return;
         }
         actionBar.setTitle(subTitle);
     }
 
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
         finish();
         return true;
     }
 
 
     // Bluetooth utils
-    private void connectDevice(Intent data, boolean secure) {
+    private void connectDevice(Intent data, boolean secure)
+    {
         Bundle extras = data.getExtras();
         String address = (extras != null) ? extras.getString("HC05_Mac_Address") : Constants.HC05_MAC_ADDRESS;
 
         BluetoothDevice aBluetoothDevice = aBluetoothAdapter.getRemoteDevice(address);
 
-        if (aBluetoothDevice != null) {
+        if (aBluetoothDevice != null)
+        {
             aBluetoothService.connect(aBluetoothDevice, secure);
         }
     }
 
-    private void setupBluetooth() {
-        drainageBtn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                sendMessage(Constants.ACTIONS_DRAIN);
-            }
-        });
+    private void setupBluetooth()
+    {
+        drainageBtn.setOnClickListener(v -> sendMessage(Constants.ACTIONS_DRAIN));
 
-        dayStatusBtn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                sendMessage(Constants.SENSORS_VALUE_LIGHT);
-            }
-        });
+        dayStatusBtn.setOnClickListener(v -> sendMessage(Constants.SENSORS_VALUE_LIGHT));
 
-        waterLevelBtn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                sendMessage(Constants.SENSORS_VALUE_WATER_LEVEL);
-            }
-        });
+        waterLevelBtn.setOnClickListener(v -> sendMessage(Constants.SENSORS_VALUE_WATER_LEVEL));
 
         aBluetoothService = new BluetoothService(this.getApplicationContext(), aHandler);
         anOutStringBuffer = new StringBuffer();
     }
 
     // Stream utils
-    private void sendMessage(String message) {
-        if (aBluetoothService.getState() != BluetoothService.STATE_CONNECTED) {
+    private void sendMessage(String message)
+    {
+        if (aBluetoothService.getState() != BluetoothService.STATE_CONNECTED)
+        {
             showToast("No conectado");
             return;
         }
 
-        if (message.length() > 0) {
+        if (message.length() > 0)
+        {
             byte[] send = message.getBytes();
-            System.out.println("MESSAGE " + message);
             aBluetoothService.write(send);
 
             anOutStringBuffer.setLength(0);
@@ -208,9 +216,11 @@ public class ArduinoActivity extends AppCompatActivity {
     }
 
     // Logica decodificado
-    private void decodifyMessage(String receivedMessage) {
+    private void decodifyMessage(String receivedMessage)
+    {
         String[] tokens = receivedMessage.split("@");
-        switch (tokens[0]) {
+        switch (tokens[0])
+        {
             case "L":
                 lightSensorValue = Float.parseFloat(tokens[1]);
                 updateLightUI(lightSensorValue);
@@ -223,21 +233,27 @@ public class ArduinoActivity extends AppCompatActivity {
     }
 
     // UI Utils
-    private void updateLightUI(Float light) {
-        if (light == Constants.IS_NIGHTFALL) {
+    private void updateLightUI(Float light)
+    {
+        if (light == Constants.IS_NIGHTFALL)
+        {
             dayStatus.setText("Noche");
             dayStatus.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.night));
-        } else {
+        } else
+        {
             dayStatus.setText("Dia");
             dayStatus.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.daylight));
         }
     }
 
-    private void updateWaterUI(Float waterLevel) {
-        if (waterLevel > Constants.THRESHOLD_NO_WATER) {
+    private void updateWaterUI(Float waterLevel)
+    {
+        if (waterLevel > Constants.THRESHOLD_NO_WATER)
+        {
             tankStatus.setText("Sin agua");
             tankStatus.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.disabled));
-        } else {
+        } else
+        {
             tankStatus.setText("Con agua");
             tankStatus.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.water));
         }
